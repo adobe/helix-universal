@@ -1,3 +1,15 @@
+# 1.0.0 (2021-04-12)
+
+
+### Bug Fixes
+
+* **ci:** use node 12 ([69726b4](https://github.com/adobe/helix-universal/commit/69726b4a6c1d9cecead59eede22f6584cd01c525))
+
+
+### Features
+
+* **universal:** import universal adapter from helix-deploy ([9c00d2e](https://github.com/adobe/helix-universal/commit/9c00d2e2a78d631813f8693376afb58535d395a7))
+
 ## [1.4.7](https://github.com/adobe/helix-library/compare/v1.4.6...v1.4.7) (2021-04-09)
 
 
