@@ -12,7 +12,7 @@
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
 const { Request } = require('@adobe/helix-fetch');
 const {
-  isBinary, ensureUTF8Charset, updateProcessEnv, cleanupHeaderValue,
+  isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, cleanupHeaderValue,
 } = require('./utils.js');
 const getGoogleSecrets = require('./google-package-params.js');
 
@@ -71,6 +71,7 @@ async function google(req, res) {
 
     const response = await main(request, context);
     ensureUTF8Charset(response);
+    ensureInvocationId(response, context);
 
     Array.from(response.headers.entries()).reduce((r, [header, value]) => r.set(header, value), res.status(response.status)).send(isBinary(response.headers.get('content-type')) ? Buffer.from(await response.arrayBuffer()) : await response.text());
   } catch (e) {
@@ -84,6 +85,8 @@ async function google(req, res) {
     console.error('error while invoking function', e);
     res
       .status(500)
+      .set('content-type', 'text/plain')
+      .set('x-invocation-id', req.headers['function-execution-id'])
       .set('x-error', cleanupHeaderValue(e.message))
       .send(e.message);
   }

@@ -12,7 +12,7 @@
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
 const { Request } = require('@adobe/helix-fetch');
 const {
-  isBinary, ensureUTF8Charset, updateProcessEnv, cleanupHeaderValue,
+  isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, cleanupHeaderValue,
 } = require('./utils.js');
 const { AzureResolver } = require('./resolver.js');
 
@@ -81,6 +81,7 @@ async function azure(context, req) {
 
     const response = await main(request, con);
     ensureUTF8Charset(response);
+    ensureInvocationId(response, con);
 
     context.res = {
       status: response.status,
@@ -95,7 +96,8 @@ async function azure(context, req) {
       context.res = {
         status: 400,
         headers: {
-          'Content-Type': 'text/plain',
+          'content-type': 'text/plain',
+          'x-invocation-id': context.invocationId,
         },
         body: e.message,
       };
@@ -106,8 +108,9 @@ async function azure(context, req) {
     context.res = {
       status: 500,
       headers: {
-        'Content-Type': 'text/plain',
+        'content-type': 'text/plain',
         'x-error': cleanupHeaderValue(e.message),
+        'x-invocation-id': context.invocationId,
       },
       body: e.message,
     };

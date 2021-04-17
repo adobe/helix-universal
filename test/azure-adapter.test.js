@@ -31,6 +31,7 @@ describe('Adapter tests for Azure', () => {
     });
 
     const context = {
+      invocationId: '1234',
       // eslint-disable-next-line no-console
       log: console.log,
       executionContext: {
@@ -44,6 +45,10 @@ describe('Adapter tests for Azure', () => {
 
     await azure(context, request);
     assert.equal(context.res.status, 200, context.res.body);
+    assert.deepEqual(context.res.headers, {
+      'content-type': 'text/plain; charset=utf-8',
+      'x-invocation-id': '1234',
+    });
   });
 
   it('handles illegal request headers with 400', async () => {
@@ -57,6 +62,7 @@ describe('Adapter tests for Azure', () => {
     });
 
     const context = {
+      invocationId: '1234',
       // eslint-disable-next-line no-console
       log: console.log,
       executionContext: {
@@ -73,6 +79,10 @@ describe('Adapter tests for Azure', () => {
 
     await azure(context, request);
     assert.equal(context.res.status, 400, context.res.body);
+    assert.deepEqual(context.res.headers, {
+      'content-type': 'text/plain',
+      'x-invocation-id': '1234',
+    });
   });
 
   it('handles recognizes the x-backup-content-type', async () => {
@@ -121,6 +131,7 @@ describe('Adapter tests for Azure', () => {
     });
 
     const context = {
+      invocationId: '1234',
       // eslint-disable-next-line no-console
       log: console.log,
       executionContext: {
@@ -137,7 +148,11 @@ describe('Adapter tests for Azure', () => {
     };
 
     await azure(context, request);
-    assert.equal(context.res.headers['x-error'], 'function kaput');
+    assert.deepEqual(context.res.headers, {
+      'content-type': 'text/plain',
+      'x-invocation-id': '1234',
+      'x-error': 'function kaput',
+    });
   });
 
   it('set correct context and environment', async () => {

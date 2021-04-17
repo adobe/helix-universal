@@ -87,6 +87,7 @@ describe('OpenWhisk Adapter Test', () => {
       body: '',
       headers: {
         'content-type': 'text/plain; charset=utf-8',
+        'x-invocation-id': '1234',
       },
       statusCode: 200,
     });
@@ -115,6 +116,7 @@ describe('OpenWhisk Adapter Test', () => {
       },
       headers: {
         'content-type': 'text/plain; charset=utf-8',
+        'x-invocation-id': '1234',
       },
       statusCode: 200,
     });
@@ -147,6 +149,7 @@ describe('OpenWhisk Adapter Test', () => {
       },
       headers: {
         'content-type': 'text/plain; charset=utf-8',
+        'x-invocation-id': '1234',
       },
       statusCode: 200,
     });
@@ -191,6 +194,7 @@ describe('OpenWhisk Adapter Test', () => {
       headers: {
         'content-type': 'text/plain; charset=utf-8',
         'x-last-activation-id': '1234',
+        'x-invocation-id': '1234',
       },
       statusCode: 200,
     });
@@ -225,6 +229,7 @@ describe('OpenWhisk Adapter Test', () => {
       headers: {
         'content-type': 'text/plain; charset=utf-8',
         'x-last-activation-id': '1234',
+        'x-invocation-id': '1234',
       },
       statusCode: 200,
     });
@@ -259,6 +264,7 @@ describe('OpenWhisk Adapter Test', () => {
       headers: {
         'content-type': 'text/plain; charset=utf-8',
         'x-last-activation-id': '1234',
+        'x-invocation-id': '1234',
       },
       statusCode: 200,
     });
@@ -286,6 +292,7 @@ describe('OpenWhisk Adapter Test', () => {
       },
       headers: {
         'content-type': 'text/plain; charset=utf-8',
+        'x-invocation-id': '1234',
       },
       statusCode: 200,
     });
@@ -316,6 +323,7 @@ describe('OpenWhisk Adapter Test', () => {
       },
       headers: {
         'content-type': 'text/plain; charset=utf-8',
+        'x-invocation-id': '1234',
       },
       statusCode: 200,
     });
@@ -341,6 +349,7 @@ describe('OpenWhisk Adapter Test', () => {
       headers: {
         'Content-Type': 'text/plain',
         'x-error': 'boing!',
+        'x-invocation-id': '1234',
       },
       statusCode: 500,
     });

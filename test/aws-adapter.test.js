@@ -100,6 +100,10 @@ describe('Adapter tests for AWS', () => {
     });
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
     assert.equal(res.statusCode, 200);
+    assert.deepEqual(res.headers, {
+      'content-type': 'text/plain; charset=utf-8',
+      'x-invocation-id': '535f0399-9c90-4042-880e-620cfec6af55',
+    });
   });
 
   it('context.invocation (external transaction id)', async () => {
@@ -142,6 +146,10 @@ describe('Adapter tests for AWS', () => {
       },
     }, DEFAULT_CONTEXT);
     assert.equal(res.statusCode, 400);
+    assert.deepEqual(res.headers, {
+      'content-type': 'text/plain',
+      'x-invocation-id': '535f0399-9c90-4042-880e-620cfec6af55',
+    });
   });
 
   it('handles error in function', async () => {
@@ -160,7 +168,11 @@ describe('Adapter tests for AWS', () => {
       },
     }, DEFAULT_CONTEXT);
     assert.equal(res.statusCode, 500);
-    assert.equal(res.headers['x-error'], 'function kaput');
+    assert.deepEqual(res.headers, {
+      'content-type': 'text/plain',
+      'x-error': 'function kaput',
+      'x-invocation-id': '535f0399-9c90-4042-880e-620cfec6af55',
+    });
   });
 
   it('handles error in epsagon wrapper', async () => {
@@ -181,7 +193,11 @@ describe('Adapter tests for AWS', () => {
       },
     }, DEFAULT_CONTEXT);
     assert.equal(res.statusCode, 500);
-    assert.equal(res.headers['x-error'], 'epsagon wrapper kaput');
+    assert.deepEqual(res.headers, {
+      'content-type': 'text/plain',
+      'x-error': 'epsagon wrapper kaput',
+      'x-invocation-id': '535f0399-9c90-4042-880e-620cfec6af55',
+    });
   });
 
   it('flushes log', async () => {
