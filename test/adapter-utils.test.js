@@ -15,7 +15,7 @@
 
 const assert = require('assert');
 const { Response } = require('@adobe/helix-fetch');
-const { isBinary, ensureUTF8Charset } = require('../src/utils.js');
+const { isBinary, ensureUTF8Charset, ensureInvocationId } = require('../src/utils.js');
 
 describe('Adapter Utils Tests: ensureUTF8Encoding', () => {
   it('defaults missing charset-type header to text/plain', async () => {
@@ -68,6 +68,30 @@ describe('Adapter Utils Tests: ensureUTF8Encoding', () => {
 
   it('errors if plain response headers', () => {
     assert.throws(() => ensureUTF8Charset({ headers: {} }), Error('response.headers has no method "get()"'));
+  });
+});
+
+describe('Adapter Utils Tests: ensureInvocationId', () => {
+  it('adds missing invocation id', async () => {
+    const resp = ensureInvocationId(new Response(), {
+      invocation: {
+        id: 'foobar',
+      },
+    });
+    assert.equal(resp.headers.get('x-invocation-id'), 'foobar');
+  });
+
+  it('ignores invocation id if already set', async () => {
+    const resp = ensureInvocationId(new Response('', {
+      headers: {
+        'x-invocation-id': 'my-id',
+      },
+    }), {
+      invocation: {
+        id: 'foobar',
+      },
+    });
+    assert.equal(resp.headers.get('x-invocation-id'), 'my-id');
   });
 });
 

@@ -74,10 +74,15 @@ describe('Adapter tests for Google', () => {
 
     const req = createMockRequest('/helix-services--content-proxy_4.3.1/foo/bar', {
       host: 'us-central1-helix-225321.cloudfunctions.net',
+      'function-execution-id': '1234',
     });
     const res = createMockResponse();
     await google(req, res);
     assert.equal(res.code, 200);
+    assert.deepEqual(res.headers, {
+      'content-type': 'text/plain; charset=utf-8',
+      'x-invocation-id': '1234',
+    });
   });
 
   it('context.func', async () => {
@@ -147,11 +152,16 @@ describe('Adapter tests for Google', () => {
     });
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
       host: 'us-central1-helix-225321.cloudfunctions.net',
+      'function-execution-id': '1234',
     });
     const res = createMockResponse();
     await google(req, res);
     assert.equal(res.code, 500);
-    assert.equal(res.headers['x-error'], 'function kaput');
+    assert.deepEqual(res.headers, {
+      'content-type': 'text/plain',
+      'x-error': 'function kaput',
+      'x-invocation-id': '1234',
+    });
   });
 
   it('handle binary response body', async () => {

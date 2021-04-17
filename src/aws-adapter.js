@@ -13,7 +13,8 @@
 const { Request } = require('@adobe/helix-fetch');
 const { epsagon } = require('@adobe/helix-epsagon');
 const {
-  isBinary, ensureUTF8Charset, updateProcessEnv, HEALTHCHECK_PATH, cleanupHeaderValue,
+  isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, HEALTHCHECK_PATH,
+  cleanupHeaderValue,
 } = require('./utils.js');
 const getAWSSecrets = require('./aws-package-params.js');
 const { AWSResolver } = require('./resolver.js');
@@ -79,6 +80,7 @@ async function lambdaAdapter(event, context, secrets) {
 
     const response = await main(request, con);
     ensureUTF8Charset(response);
+    ensureInvocationId(response, con);
 
     // flush log if present
     if (con.log && con.log.flush) {
@@ -98,7 +100,8 @@ async function lambdaAdapter(event, context, secrets) {
       return {
         statusCode: 400,
         headers: {
-          'Content-Type': 'text/plain',
+          'content-type': 'text/plain',
+          'x-invocation-id': context.awsRequestId,
         },
         body: e.message,
       };
@@ -108,8 +111,9 @@ async function lambdaAdapter(event, context, secrets) {
     return {
       statusCode: 500,
       headers: {
-        'Content-Type': 'text/plain',
+        'content-type': 'text/plain',
         'x-error': cleanupHeaderValue(e.message),
+        'x-invocation-id': context.awsRequestId,
       },
       body: e.message,
     };
@@ -140,8 +144,9 @@ async function lambda(evt, ctx) {
     return {
       statusCode: 500,
       headers: {
-        'Content-Type': 'text/plain',
+        'content-type': 'text/plain',
         'x-error': cleanupHeaderValue(e.message),
+        'x-invocation-id': ctx.awsRequestId,
       },
       body: e.message,
     };

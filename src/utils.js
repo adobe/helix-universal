@@ -54,6 +54,19 @@ function ensureUTF8Charset(resp) {
 }
 
 /**
+ * Sets the 'x-invocation-id' to the response header it not already present.
+ * @param {Response} resp the response
+ * @param {UniversalContext} context the context
+ * @return {Response} the same response
+ */
+function ensureInvocationId(resp, context) {
+  if (!resp.headers.has('x-invocation-id')) {
+    resp.headers.set('x-invocation-id', context.invocation.id);
+  }
+  return resp;
+}
+
+/**
  * Updates the process environment with function information.
  * (note that we don't set the invocation id, since not all runtimes isolate the process env)
  * @param {UniversalContext} context The context
@@ -80,6 +93,7 @@ const HEALTHCHECK_PATH = '/_status_check/healthcheck.json';
 module.exports = {
   isBinary,
   ensureUTF8Charset,
+  ensureInvocationId,
   updateProcessEnv,
   cleanupHeaderValue,
   HEALTHCHECK_PATH,

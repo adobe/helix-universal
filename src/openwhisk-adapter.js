@@ -14,7 +14,8 @@ const querystring = require('querystring');
 const { Request } = require('@adobe/helix-fetch');
 const { epsagon } = require('@adobe/helix-epsagon');
 const {
-  isBinary, ensureUTF8Charset, updateProcessEnv, HEALTHCHECK_PATH, cleanupHeaderValue,
+  isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, HEALTHCHECK_PATH,
+  cleanupHeaderValue,
 } = require('./utils.js');
 
 const { OpenwhiskResolver } = require('./resolver.js');
@@ -110,6 +111,7 @@ async function openwhiskAdapter(params) {
 
     const response = await main(request, context);
     ensureUTF8Charset(response);
+    ensureInvocationId(response, context);
 
     const isBase64Encoded = isBinary(response.headers.get('content-type'));
     return {
@@ -125,6 +127,7 @@ async function openwhiskAdapter(params) {
         statusCode: 400,
         headers: {
           'Content-Type': 'text/plain',
+          'x-invocation-id': process.env.__OW_ACTIVATION_ID,
         },
         body: e.message,
       };
@@ -135,6 +138,7 @@ async function openwhiskAdapter(params) {
       statusCode: 500,
       headers: {
         'Content-Type': 'text/plain',
+        'x-invocation-id': process.env.__OW_ACTIVATION_ID,
         'x-error': cleanupHeaderValue(e.message),
       },
       body: 'Internal Server Error',
