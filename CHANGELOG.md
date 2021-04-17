@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/adobe/helix-universal/compare/v1.0.0...v1.1.0) (2021-04-17)
+
+
+### Features
+
+* add x-invocation-id to response headers ([#6](https://github.com/adobe/helix-universal/issues/6)) ([7644754](https://github.com/adobe/helix-universal/commit/7644754a5eb300d9dfcd84e5b99e365951f25ce5))
+
 # 1.0.0 (2021-04-12)
 
 
