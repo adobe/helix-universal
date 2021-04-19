@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/adobe/helix-universal/compare/v1.2.0...v1.2.1) (2021-04-19)
+
+
+### Bug Fixes
+
+* **google:** avoid dots in package name for secrets ([098ee78](https://github.com/adobe/helix-universal/commit/098ee781049f84ebb154c66c946d0f362bbc24f6)), closes [adobe/helix-deploy#223](https://github.com/adobe/helix-deploy/issues/223) [adobe/helix-deploy#222](https://github.com/adobe/helix-deploy/issues/222)
+
 # [1.2.0](https://github.com/adobe/helix-universal/compare/v1.1.0...v1.2.0) (2021-04-19)
 
 
