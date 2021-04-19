@@ -142,7 +142,7 @@ async function lambda(evt, ctx) {
     return handler(evt, ctx);
   } catch (e) {
     return {
-      statusCode: 500,
+      statusCode: e.statusCode || 500,
       headers: {
         'content-type': 'text/plain',
         'x-error': cleanupHeaderValue(e.message),
