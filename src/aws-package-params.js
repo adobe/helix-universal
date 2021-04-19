@@ -47,7 +47,12 @@ async function loadAWSSecrets(functionName) {
     } while (nextToken);
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.error('unable to get parameters', e);
+    console.error('unable to load function params', e);
+    const error = new Error('unable to load function params');
+    if (e.code === 'ThrottlingException') {
+      error.statusCode = 429;
+    }
+    throw error;
   }
 
   return params.reduce((p, param) => {
