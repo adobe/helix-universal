@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/adobe/helix-universal/compare/v1.1.0...v1.2.0) (2021-04-19)
+
+
+### Features
+
+* **aws:** send 429 if package params can't be loaded due to rate limit ([#8](https://github.com/adobe/helix-universal/issues/8)) ([6fee658](https://github.com/adobe/helix-universal/commit/6fee658738ea5d8a082d336868ee0b4ed6b554d1)), closes [#5](https://github.com/adobe/helix-universal/issues/5)
+
 # [1.1.0](https://github.com/adobe/helix-universal/compare/v1.0.0...v1.1.0) (2021-04-17)
 
 
