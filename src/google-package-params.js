@@ -12,7 +12,7 @@
 
 async function getGoogleSecrets(functionName, projectID) {
   const parent = `projects/${projectID}`;
-  const package = functionName.replace(/--.*/, '');
+  const package = functionName.replace(/--.*/, '').replace(/\./g, '_');
   const name = `${parent}/secrets/helix-deploy--${package}/versions/latest`;
   try {
     // delay the import so that other runtimes do not have to care
