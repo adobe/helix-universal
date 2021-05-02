@@ -83,6 +83,41 @@ describe('Adapter tests for AWS', () => {
     assert.equal(res.statusCode, 200);
   });
 
+  it('provides package params', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: (request, context) => new Response(JSON.stringify(context.env)),
+      },
+      './aws-package-params.js': () => ({
+        SOME_SECRET: 'pssst',
+      }),
+    });
+    const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
+    assert.equal(res.statusCode, 200);
+    const body = JSON.parse(res.body);
+    Object.keys(process.env).forEach((key) => delete body[key]);
+    assert.deepEqual(body, {
+      SOME_SECRET: 'pssst',
+    });
+  });
+
+  it('raw adapter doesnt call package params', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: (request, context) => new Response(JSON.stringify(context.env)),
+      },
+      './aws-package-params.js': () => {
+        throw Error('should not be called.');
+      },
+    });
+    const res = await lambda.raw(DEFAULT_EVENT, DEFAULT_CONTEXT);
+    assert.equal(res.statusCode, 200);
+    const body = JSON.parse(res.body);
+    Object.keys(process.env).forEach((key) => delete body[key]);
+    assert.deepEqual(body, {
+    });
+  });
+
   it('context.invocation', async () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
