@@ -45,12 +45,15 @@ function createMockRequest(url, headers) {
 
 describe('Adapter tests for Google', () => {
   it('handles illegal request headers with 400', async () => {
+    process.env.K_SERVICE = 'helix-services--content-proxy';
+    process.env.K_REVISION = '4.3.1';
     const google = proxyquire('../src/google-adapter.js', {
       './main.js': {
         main: () => new Response('ok'),
       },
     });
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
+      host: 'us-central1-helix-225321.cloudfunctions.net',
       accept: 'жsome value',
     });
     const res = createMockResponse();
@@ -83,6 +86,79 @@ describe('Adapter tests for Google', () => {
       'content-type': 'text/plain; charset=utf-8',
       'x-invocation-id': '1234',
     });
+  });
+
+  it('provides package params', async () => {
+    process.env.K_SERVICE = 'helix-services--content-proxy';
+    process.env.K_REVISION = '4.3.1';
+    const google = proxyquire('../src/google-adapter.js', {
+      './main.js': {
+        main: (request, context) => new Response(JSON.stringify(context.env)),
+      },
+      './google-package-params.js': () => ({
+        SOME_SECRET: 'pssst',
+      }),
+    });
+
+    const req = createMockRequest('/helix-services--content-proxy_4.3.1/foo/bar', {
+      host: 'us-central1-helix-225321.cloudfunctions.net',
+      'function-execution-id': '1234',
+    });
+    const res = createMockResponse();
+    await google(req, res);
+    assert.equal(res.code, 200);
+    const body = JSON.parse(res.body);
+    Object.keys(process.env).forEach((key) => delete body[key]);
+    assert.deepEqual(body, {
+      SOME_SECRET: 'pssst',
+    });
+  });
+
+  it('raw adapter doesnt call package params', async () => {
+    process.env.K_SERVICE = 'helix-services--content-proxy';
+    process.env.K_REVISION = '4.3.1';
+    const google = proxyquire('../src/google-adapter.js', {
+      './main.js': {
+        main: (request, context) => new Response(JSON.stringify(context.env)),
+      },
+      './google-package-params.js': () => {
+        throw Error('should not be called');
+      },
+    });
+
+    const req = createMockRequest('/helix-services--content-proxy_4.3.1/foo/bar', {
+      host: 'us-central1-helix-225321.cloudfunctions.net',
+      'function-execution-id': '1234',
+    });
+    const res = createMockResponse();
+    await google.raw(req, res);
+    assert.equal(res.code, 200);
+    const body = JSON.parse(res.body);
+    Object.keys(process.env).forEach((key) => delete body[key]);
+    assert.deepEqual(body, {
+    });
+  });
+
+  it('adapter catches error in secrets fetching', async () => {
+    process.env.K_SERVICE = 'helix-services--content-proxy';
+    process.env.K_REVISION = '4.3.1';
+    const google = proxyquire('../src/google-adapter.js', {
+      './main.js': {
+        main: (request, context) => new Response(JSON.stringify(context.env)),
+      },
+      './google-package-params.js': () => {
+        throw Error('something went wrong');
+      },
+    });
+
+    const req = createMockRequest('/helix-services--content-proxy_4.3.1/foo/bar', {
+      host: 'us-central1-helix-225321.cloudfunctions.net',
+      'function-execution-id': '1234',
+    });
+    const res = createMockResponse();
+    await google(req, res);
+    assert.equal(res.code, 500);
+    assert.equal(res.headers['x-error'], 'something went wrong');
   });
 
   it('context.func', async () => {

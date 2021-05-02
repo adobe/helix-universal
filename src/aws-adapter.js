@@ -26,7 +26,7 @@ const { AWSResolver } = require('./resolver.js');
  * @param {object} secrets AWS secrets
  * @returns {*} lambda response
  */
-async function lambdaAdapter(event, context, secrets) {
+async function lambdaAdapter(event, context, secrets = {}) {
   try {
     const request = new Request(`https://${event.requestContext.domainName}${event.rawPath}${event.rawQueryString ? '?' : ''}${event.rawQueryString}`, {
       method: event.requestContext.http.method,
@@ -152,5 +152,7 @@ async function lambda(evt, ctx) {
     };
   }
 }
+
+lambda.raw = lambdaAdapter;
 
 module.exports = lambda;
