@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/adobe/helix-universal/compare/v1.2.1...v1.3.0) (2021-05-02)
+
+
+### Features
+
+* **adapter:** expose aws and google adapters w/o params and epsagon ([#14](https://github.com/adobe/helix-universal/issues/14)) ([0d899e1](https://github.com/adobe/helix-universal/commit/0d899e1f9809fd230527e552220c774ac21ea858))
+
 ## [1.2.1](https://github.com/adobe/helix-universal/compare/v1.2.0...v1.2.1) (2021-04-19)
 
 
