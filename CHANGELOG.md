@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/adobe/helix-universal/compare/v1.3.0...v1.4.0) (2021-05-03)
+
+
+### Features
+
+* allow to run function without API gateway ([#15](https://github.com/adobe/helix-universal/issues/15)) ([3a1d6d3](https://github.com/adobe/helix-universal/commit/3a1d6d3b407ffea2a286cf1355f3a55dd95e4994))
+
 # [1.3.0](https://github.com/adobe/helix-universal/compare/v1.2.1...v1.3.0) (2021-05-02)
 
 
