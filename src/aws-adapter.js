@@ -139,6 +139,20 @@ async function lambda(evt, ctx) {
         });
       }
     }
+    if (!evt.requestContext) {
+      // function was invoked directly, not through API Gateway
+      const searchParams = new URLSearchParams();
+      Object.getOwnPropertyNames(evt).forEach((name) => {
+        const value = evt[name];
+        if (typeof value === 'string') {
+          searchParams.append(name, value);
+        }
+      });
+      evt.rawPath = '';
+      evt.rawQueryString = searchParams.toString();
+      evt.headers = {};
+      evt.requestContext = { http: {} };
+    }
     return handler(evt, ctx);
   } catch (e) {
     return {

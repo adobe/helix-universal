@@ -331,4 +331,34 @@ describe('Adapter tests for AWS', () => {
     }, DEFAULT_CONTEXT);
     assert.equal(res.statusCode, 200);
   });
+
+  it('can be run without requestContext', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: (request, context) => {
+          assert.deepStrictEqual(context.func, {
+            name: 'dump',
+            package: 'helix-pages',
+            version: '4.3.1',
+            fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
+            app: undefined,
+          });
+          const { searchParams } = new URL(request.url);
+          assert.strictEqual(searchParams.toString(), 'key1=value1&key2=value2&key3=value3');
+          return new Response('ok');
+        },
+      },
+      './aws-package-params.js': () => ({}),
+    });
+    const res = await lambda(
+      {
+        key1: 'value1',
+        key2: 'value2',
+        key3: 'value3',
+        other: {},
+      },
+      DEFAULT_CONTEXT,
+    );
+    assert.equal(res.statusCode, 200);
+  });
 });
