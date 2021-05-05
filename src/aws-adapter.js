@@ -152,6 +152,13 @@ async function lambda(evt, ctx) {
       evt.rawQueryString = searchParams.toString();
       evt.headers = {};
       evt.requestContext = { http: {} };
+
+      // function was invoked by a trigger
+      if (!evt.body && evt.Records && evt.Records.length === 1) {
+        evt.requestContext.http.method = 'POST';
+        evt.body = evt.Records[0].body;
+        evt.headers['content-type'] = 'application/json';
+      }
     }
     return handler(evt, ctx);
   } catch (e) {

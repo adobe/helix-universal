@@ -361,4 +361,38 @@ describe('Adapter tests for AWS', () => {
     );
     assert.equal(res.statusCode, 200);
   });
+
+  it('can be run as a trigger', async () => {
+    const messageBody = {
+      key1: 'value1',
+      key2: 'value2',
+      key3: 'value3',
+    };
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: async (request, context) => {
+          assert.deepStrictEqual(context.func, {
+            name: 'dump',
+            package: 'helix-pages',
+            version: '4.3.1',
+            fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
+            app: undefined,
+          });
+          const json = await request.json();
+          assert.deepStrictEqual(json, messageBody);
+          return new Response('ok');
+        },
+      },
+      './aws-package-params.js': () => ({}),
+    });
+    const res = await lambda(
+      {
+        Records: [{
+          body: JSON.stringify(messageBody, null, 2),
+        }],
+      },
+      DEFAULT_CONTEXT,
+    );
+    assert.equal(res.statusCode, 200);
+  });
 });
