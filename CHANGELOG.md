@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/adobe/helix-universal/compare/v1.4.0...v1.5.0) (2021-05-07)
+
+
+### Features
+
+* add support for SQS trigger ([#19](https://github.com/adobe/helix-universal/issues/19)) ([700998a](https://github.com/adobe/helix-universal/commit/700998a70732f1e0b9e73792ab84a0f7b7354d14))
+
 # [1.4.0](https://github.com/adobe/helix-universal/compare/v1.3.0...v1.4.0) (2021-05-03)
 
 
