@@ -74,6 +74,11 @@ async function lambdaAdapter(event, context, secrets = {}) {
       },
     };
 
+    // support for Amazon SQS, remember records passed by trigger
+    if (event.Records) {
+      con.records = event.Records;
+    }
+
     updateProcessEnv(con);
     // eslint-disable-next-line import/no-unresolved,global-require
     const { main } = require('./main.js');

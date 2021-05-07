@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
-const { Response } = require('@adobe/helix-fetch');
+const { Request, Response } = require('@adobe/helix-fetch');
 const assert = require('assert');
 const proxyquire = require('proxyquire').noCallThru();
 
@@ -356,6 +356,47 @@ describe('Adapter tests for AWS', () => {
         key2: 'value2',
         key3: 'value3',
         other: {},
+      },
+      DEFAULT_CONTEXT,
+    );
+    assert.equal(res.statusCode, 200);
+  });
+
+  it('can be run as a trigger with context.records', async () => {
+    const messageBody = {
+      key1: 'value1',
+      key2: 'value2',
+      key3: 'value3',
+    };
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: async (request, context) => {
+          if (context.records) {
+            const { body } = context.records[0];
+            // eslint-disable-next-line no-param-reassign
+            request = new Request(request.url, {
+              method: 'POST', body, headers: { 'content-type': 'application/json' },
+            });
+          }
+          assert.deepStrictEqual(context.func, {
+            name: 'dump',
+            package: 'helix-pages',
+            version: '4.3.1',
+            fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
+            app: undefined,
+          });
+          const json = await request.json();
+          assert.deepStrictEqual(json, messageBody);
+          return new Response('ok');
+        },
+      },
+      './aws-package-params.js': () => ({}),
+    });
+    const res = await lambda(
+      {
+        Records: [{
+          body: JSON.stringify(messageBody, null, 2),
+        }],
       },
       DEFAULT_CONTEXT,
     );
