@@ -74,6 +74,11 @@ async function lambdaAdapter(event, context, secrets = {}) {
       },
     };
 
+    // support for Amazon SQS, remember records passed by trigger
+    if (event.Records) {
+      con.records = event.Records;
+    }
+
     updateProcessEnv(con);
     // eslint-disable-next-line import/no-unresolved,global-require
     const { main } = require('./main.js');
@@ -152,13 +157,6 @@ async function lambda(evt, ctx) {
       evt.rawQueryString = searchParams.toString();
       evt.headers = {};
       evt.requestContext = { http: {} };
-
-      // function was invoked by a trigger
-      if (!evt.body && evt.Records && evt.Records.length === 1) {
-        evt.requestContext.http.method = 'POST';
-        evt.body = evt.Records[0].body;
-        evt.headers['content-type'] = 'application/json';
-      }
     }
     return handler(evt, ctx);
   } catch (e) {

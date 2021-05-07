@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
-const { Response } = require('@adobe/helix-fetch');
+const { Request, Response } = require('@adobe/helix-fetch');
 const assert = require('assert');
 const proxyquire = require('proxyquire').noCallThru();
 
@@ -362,7 +362,7 @@ describe('Adapter tests for AWS', () => {
     assert.equal(res.statusCode, 200);
   });
 
-  it('can be run as a trigger', async () => {
+  it('can be run as a trigger with context.records', async () => {
     const messageBody = {
       key1: 'value1',
       key2: 'value2',
@@ -371,6 +371,13 @@ describe('Adapter tests for AWS', () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
         main: async (request, context) => {
+          if (context.records) {
+            const { body } = context.records[0];
+            // eslint-disable-next-line no-param-reassign
+            request = new Request(request.url, {
+              method: 'POST', body, headers: { 'content-type': 'application/json' },
+            });
+          }
           assert.deepStrictEqual(context.func, {
             name: 'dump',
             package: 'helix-pages',
