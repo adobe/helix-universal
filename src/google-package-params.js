@@ -12,8 +12,8 @@
 
 async function getGoogleSecrets(functionName, projectID) {
   const parent = `projects/${projectID}`;
-  const package = functionName.replace(/--.*/, '').replace(/\./g, '_');
-  const name = `${parent}/secrets/helix-deploy--${package}/versions/latest`;
+  const packageName = functionName.replace(/--.*/, '').replace(/\./g, '_');
+  const name = `${parent}/secrets/helix-deploy--${packageName}/versions/latest`;
   try {
     // delay the import so that other runtimes do not have to care
     // eslint-disable-next-line  import/no-unresolved, global-require
