@@ -17,7 +17,7 @@ async function getGoogleSecrets(functionName, projectID) {
   try {
     // delay the import so that other runtimes do not have to care
     // eslint-disable-next-line  import/no-unresolved, global-require
-    const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
+    const { SecretManagerServiceClient } = await import('@google-cloud/secret-manager');
 
     // hope that the credentials appear by magic
     const client = new SecretManagerServiceClient();
