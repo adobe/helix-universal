@@ -25,7 +25,7 @@ const { AzureResolver } = require('./resolver.js');
 async function azure(context, req) {
   context.log('JavaScript HTTP trigger function processed a request.');
   // eslint-disable-next-line global-require, import/no-unresolved
-  const params = require('./params.json');
+  const params = await import('./params.json');
 
   let body;
   if (!/^(GET|HEAD)$/i.test(req.method)) {
