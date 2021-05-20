@@ -11,7 +11,9 @@
  */
 /* eslint-env mocha */
 const assert = require('assert');
+const path = require('path');
 const AWSStorage = require('../src/aws-storage');
+const GoogleStorage = require('../src/google-storage');
 const Storage = require('../src/storage-api');
 
 describe('AWS Storage API Unit Tests', () => {
@@ -21,7 +23,6 @@ describe('AWS Storage API Unit Tests', () => {
   });
 
   it('Sign URL for PUT', async () => {
-    // https://helix3-prototype-fallback-public.s3.us-east-1.amazonaws.com/
     const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', 'index.md', 'PUT', 120);
     assert.ok(res);
     assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=FAKE'), `${res} is invalid`);
@@ -29,10 +30,28 @@ describe('AWS Storage API Unit Tests', () => {
 
   it('Sign URL for GET', async () => {
     process.env.AWS_REGION = 'us-east-1';
-    // https://helix3-prototype-fallback-public.s3.us-east-1.amazonaws.com/
     const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', '/index.md');
     assert.ok(res);
     assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=FAKE'), `${res} is invalid`);
+  });
+});
+
+// if this test fails, set env GOOGLE_APPLICATION_CREDENTIALS to point to a valid credential file
+describe('Google Storage API Unit Tests', () => {
+  beforeEach(() => {
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = path.resolve(__dirname, 'expired-google-credentials.json');
+  });
+
+  it('Sign URL for PUT', async () => {
+    const res = await GoogleStorage.presignURL('helix3-prototype-fallback-public', 'index.md', 'PUT', 120);
+    assert.ok(res);
+    assert.ok(res.startsWith('https://storage.googleapis.com/helix3-prototype-fallback-public/index.md?X-Goog-Algorithm=GOOG4-RSA-SHA256'), `${res} is invalid`);
+  });
+
+  it('Sign URL for GET', async () => {
+    const res = await GoogleStorage.presignURL('helix3-prototype-fallback-public', '/index.md');
+    assert.ok(res);
+    assert.ok(res.startsWith('https://storage.googleapis.com/helix3-prototype-fallback-public/index.md?X-Goog-Algorithm=GOOG4-RSA-SHA256'), `${res} is invalid`);
   });
 });
 
