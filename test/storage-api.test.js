@@ -18,7 +18,6 @@ describe('AWS Storage API Unit Tests', () => {
   beforeEach(() => {
     process.env.AWS_ACCESS_KEY_ID = 'FAKE';
     process.env.AWS_SECRET_ACCESS_KEY = 'Super/FAKE';
-    process.env.AWS_REGION = 'us-east-1';
   });
 
   it('Sign URL for PUT', async () => {
@@ -29,8 +28,9 @@ describe('AWS Storage API Unit Tests', () => {
   });
 
   it('Sign URL for GET', async () => {
+    process.env.AWS_REGION = 'us-east-1';
     // https://helix3-prototype-fallback-public.s3.us-east-1.amazonaws.com/
-    const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', 'index.md');
+    const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', '/index.md');
     assert.ok(res);
     assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=FAKE'), `${res} is invalid`);
   });
