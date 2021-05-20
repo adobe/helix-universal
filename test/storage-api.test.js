@@ -23,15 +23,16 @@ describe('AWS Storage API Unit Tests', () => {
 
   it('Sign URL for PUT', async () => {
     // https://helix3-prototype-fallback-public.s3.us-east-1.amazonaws.com/
-    const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', '/index.md', 'PUT', 120);
+    const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', 'index.md', 'PUT', 120);
     assert.ok(res);
-    assert.equal(res, 'https://dummy');
+    assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=FAKE'), `${res} is invalid`);
   });
 
   it('Sign URL for GET', async () => {
     // https://helix3-prototype-fallback-public.s3.us-east-1.amazonaws.com/
-    const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', '/index.md');
+    const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', 'index.md');
     assert.ok(res);
+    assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=FAKE'), `${res} is invalid`);
   });
 });
 

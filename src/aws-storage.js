@@ -20,17 +20,17 @@ class AWSStorage extends Storage {
       AWS = require('aws-sdk');
 
       AWS.config.update({
-        region: process.env.AWS_REGION,
+        region: process.env.AWS_REGION || 'us-east-1',
         logger: console,
       });
     }
 
     const s3 = new AWS.S3();
 
-    const operation = method === 'PUT' ? 'putOperation' : 'getOperation';
+    const operation = method === 'PUT' ? 'putObject' : 'getObject';
     const params = {
       Bucket: bucket,
-      Key: path,
+      Key: path.startsWith('/') ? path.substring(1) : path,
       Expires: expires,
     };
 
