@@ -15,6 +15,12 @@ const AWSStorage = require('../src/aws-storage');
 const Storage = require('../src/storage-api');
 
 describe('AWS Storage API Unit Tests', () => {
+  beforeEach(() => {
+    process.env.AWS_ACCESS_KEY_ID = 'FAKE';
+    process.env.AWS_SECRET_ACCESS_KEY = 'Super/FAKE';
+    process.env.AWS_REGION = 'us-east-1';
+  });
+
   it('Sign URL for PUT', async () => {
     // https://helix3-prototype-fallback-public.s3.us-east-1.amazonaws.com/
     const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', '/index.md', 'PUT', 120);
