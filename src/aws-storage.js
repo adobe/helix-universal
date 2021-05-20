@@ -16,7 +16,7 @@ let AWS;
 class AWSStorage extends Storage {
   static async presignURL(bucket, path, method = 'GET', expires = 60) {
     if (!AWS) {
-      // eslint-disable-next-line global-require
+      // eslint-disable-next-line global-require, import/no-extraneous-dependencies
       AWS = require('aws-sdk');
 
       AWS.config.update({
