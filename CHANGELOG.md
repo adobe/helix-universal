@@ -1,3 +1,17 @@
+# [1.6.0](https://github.com/adobe/helix-universal/compare/v1.5.1...v1.6.0) (2021-05-27)
+
+
+### Bug Fixes
+
+* **aws:** use correct operation names ([177f303](https://github.com/adobe/helix-universal/commit/177f30390763c0aaab6414442ce0249ba793118e))
+
+
+### Features
+
+* **aws:** add storage api ([a078cac](https://github.com/adobe/helix-universal/commit/a078cac28c84642bd97b9e379309352c2d7f7368)), closes [#25](https://github.com/adobe/helix-universal/issues/25)
+* **google:** add google storage api ([da3234d](https://github.com/adobe/helix-universal/commit/da3234ddb68c7d3a282b10e89fb06281df930624))
+* **google:** expose storage api in context for google ([e5fc7dd](https://github.com/adobe/helix-universal/commit/e5fc7ddb26073bff2365d246a0b1e94855cde35d)), closes [#25](https://github.com/adobe/helix-universal/issues/25)
+
 ## [1.5.1](https://github.com/adobe/helix-universal/compare/v1.5.0...v1.5.1) (2021-05-17)
 
 
