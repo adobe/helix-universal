@@ -18,6 +18,7 @@ const {
 } = require('./utils.js');
 const getAWSSecrets = require('./aws-package-params.js');
 const { AWSResolver } = require('./resolver.js');
+const { AWSStorage } = require('./aws-storage');
 
 /**
  * The (inner) universal adapter for lambda functions with the secrets already retrieved
@@ -72,6 +73,7 @@ async function lambdaAdapter(event, context, secrets = {}) {
         ...process.env,
         ...secrets,
       },
+      storage: AWSStorage,
     };
 
     // support for Amazon SQS, remember records passed by trigger
