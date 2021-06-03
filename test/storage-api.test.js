@@ -23,9 +23,17 @@ describe('AWS Storage API Unit Tests', () => {
   });
 
   it('Sign URL for PUT', async () => {
-    const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', 'index.md', 'PUT', 120);
+    const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', 'index.md', {}, 'PUT', 120);
     assert.ok(res);
     assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=FAKE'), `${res} is invalid`);
+  });
+
+  it('Sign URL for PUT with content type', async () => {
+    const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', 'index.md', {
+      ContentType: 'application/json',
+    }, 'PUT', 120);
+    assert.ok(res);
+    assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=FAKE&Content-Type=application%2Fjson'), `${res} is invalid`);
   });
 
   it('Sign URL for GET', async () => {
@@ -43,7 +51,16 @@ describe('Google Storage API Unit Tests', () => {
   });
 
   it('Sign URL for PUT', async () => {
-    const res = await GoogleStorage.presignURL('helix3-prototype-fallback-public', 'index.md', 'PUT', 120);
+    const res = await GoogleStorage.presignURL('helix3-prototype-fallback-public', 'index.md', {}, 'PUT', 120);
+    assert.ok(res);
+    assert.ok(res.startsWith('https://storage.googleapis.com/helix3-prototype-fallback-public/index.md?X-Goog-Algorithm=GOOG4-RSA-SHA256'), `${res} is invalid`);
+  });
+
+  it('Sign URL for PUT with content type', async () => {
+    const res = await GoogleStorage.presignURL('helix3-prototype-fallback-public', 'index.md', {
+      ContentType: 'application/json',
+    }, 'PUT', 120);
+    console.log(res)
     assert.ok(res);
     assert.ok(res.startsWith('https://storage.googleapis.com/helix3-prototype-fallback-public/index.md?X-Goog-Algorithm=GOOG4-RSA-SHA256'), `${res} is invalid`);
   });
@@ -58,7 +75,7 @@ describe('Google Storage API Unit Tests', () => {
 describe('Generic Storage API Unit Tests', () => {
   it('Sign URL for PUT', async () => {
     // https://helix3-prototype-fallback-public.s3.us-east-1.amazonaws.com/
-    const res = await Storage.presignURL('helix3-prototype-fallback-public', '/index.md', 'PUT', 120);
+    const res = await Storage.presignURL('helix3-prototype-fallback-public', '/index.md', {}, 'PUT', 120);
     assert.equal(res, '');
   });
 

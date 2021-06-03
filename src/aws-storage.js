@@ -14,7 +14,7 @@ const Storage = require('./storage-api');
 let AWS;
 
 class AWSStorage extends Storage {
-  static async presignURL(bucket, path, method = 'GET', expires = 60) {
+  static async presignURL(bucket, path, blobParams = {}, method = 'GET', expires = 60) {
     if (!AWS) {
       // eslint-disable-next-line global-require, import/no-extraneous-dependencies
       AWS = require('aws-sdk');
@@ -32,6 +32,7 @@ class AWSStorage extends Storage {
       Bucket: bucket,
       Key: path.startsWith('/') ? path.substring(1) : path,
       Expires: expires,
+      ...blobParams,
     };
 
     return s3.getSignedUrl(operation, params);
