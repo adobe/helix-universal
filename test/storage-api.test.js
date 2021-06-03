@@ -60,7 +60,6 @@ describe('Google Storage API Unit Tests', () => {
     const res = await GoogleStorage.presignURL('helix3-prototype-fallback-public', 'index.md', {
       ContentType: 'application/json',
     }, 'PUT', 120);
-    console.log(res)
     assert.ok(res);
     assert.ok(res.startsWith('https://storage.googleapis.com/helix3-prototype-fallback-public/index.md?X-Goog-Algorithm=GOOG4-RSA-SHA256'), `${res} is invalid`);
   });
