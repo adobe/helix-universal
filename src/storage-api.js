@@ -12,7 +12,7 @@
 
 /* eslint-disable no-unused-vars */
 class Storage {
-  static async presignURL(bucket, path, method = 'GET', expires = 60) {
+  static async presignURL(bucket, path, blobParams = {}, method = 'GET', expires = 60) {
     return '';
   }
 }

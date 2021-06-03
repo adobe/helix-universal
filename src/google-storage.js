@@ -15,7 +15,7 @@ const AbstractStorage = require('./storage-api');
 let storage;
 
 class GoogleStorage extends AbstractStorage {
-  static async presignURL(bucket, path, method = 'GET', expires = 60) {
+  static async presignURL(bucket, path, blobParams = {}, method = 'GET', expires = 60) {
     if (!storage) {
       // eslint-disable-next-line global-require, import/no-extraneous-dependencies
       const { Storage } = require('@google-cloud/storage');
@@ -28,6 +28,7 @@ class GoogleStorage extends AbstractStorage {
       version: 'v4',
       action,
       expires: Date.now() + expires * 1000, // 15 minutes
+      ...blobParams,
     };
 
     // Get a v4 signed URL for reading the file
