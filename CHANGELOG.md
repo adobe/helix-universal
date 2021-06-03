@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/adobe/helix-universal/compare/v1.6.1...v1.6.2) (2021-06-03)
+
+
+### Bug Fixes
+
+* add possibility to specify blob options for storage api ([#36](https://github.com/adobe/helix-universal/issues/36)) ([93e0d6d](https://github.com/adobe/helix-universal/commit/93e0d6d8ea7b82fdf1c9e0f9df026b732b5b5635)), closes [#35](https://github.com/adobe/helix-universal/issues/35)
+
 ## [1.6.1](https://github.com/adobe/helix-universal/compare/v1.6.0...v1.6.1) (2021-05-31)
 
 
