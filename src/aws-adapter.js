@@ -146,7 +146,7 @@ async function lambda(evt, ctx) {
 
     if (!evt.nonHttp) {
       // do not use Epsagon otherwise as it currently reports issues for functions that throw
-      if (secrets.EPSAGON_TOKEN && !evt.nonHttp) {
+      if (secrets.EPSAGON_TOKEN) {
         // check if health check
         const suffix = evt.pathParameters && evt.pathParameters.path ? `/${evt.pathParameters.path}` : '';
         if (suffix !== HEALTHCHECK_PATH) {
