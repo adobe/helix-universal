@@ -143,17 +143,20 @@ async function lambda(evt, ctx) {
 
     const secrets = await getAWSSecrets(ctx.functionName);
     let handler = (event, context) => lambdaAdapter(event, context, secrets);
-    if (secrets.EPSAGON_TOKEN && !evt.nonHttp) {
-      // check if health check
-      const suffix = evt.pathParameters && evt.pathParameters.path ? `/${evt.pathParameters.path}` : '';
-      if (suffix !== HEALTHCHECK_PATH) {
-        handler = epsagon(handler, {
-          token: secrets.EPSAGON_TOKEN,
-        });
+
+    if (!evt.nonHttp) {
+      // do not use Epsagon otherwise as it currently reports issues for functions that throw
+      if (secrets.EPSAGON_TOKEN && !evt.nonHttp) {
+        // check if health check
+        const suffix = evt.pathParameters && evt.pathParameters.path ? `/${evt.pathParameters.path}` : '';
+        if (suffix !== HEALTHCHECK_PATH) {
+          handler = epsagon(handler, {
+            token: secrets.EPSAGON_TOKEN,
+          });
+        }
       }
-    }
-    if (evt.nonHttp) {
-      // not through Gateway API, so mimic minimal requirements
+    } else {
+      // mimic minimal requirements for our environment setup in lambdaAdapter
       const searchParams = new URLSearchParams();
       Object.getOwnPropertyNames(evt).forEach((name) => {
         const value = evt[name];
