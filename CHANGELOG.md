@@ -1,3 +1,10 @@
+## [1.6.4](https://github.com/adobe/helix-universal/compare/v1.6.3...v1.6.4) (2021-07-07)
+
+
+### Bug Fixes
+
+* support delivery failure ([#44](https://github.com/adobe/helix-universal/issues/44)) ([e25892b](https://github.com/adobe/helix-universal/commit/e25892bf4b7a47dd0c8d232c0c6cdd5ab852cc71))
+
 ## [1.6.3](https://github.com/adobe/helix-universal/compare/v1.6.2...v1.6.3) (2021-06-11)
 
 
