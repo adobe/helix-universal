@@ -1,3 +1,10 @@
+## [1.6.5](https://github.com/adobe/helix-universal/compare/v1.6.4...v1.6.5) (2021-07-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-epsagon to v1.6.8 ([#46](https://github.com/adobe/helix-universal/issues/46)) ([e8c40c9](https://github.com/adobe/helix-universal/commit/e8c40c97cf806827ce09bafc03b62bfb1bdc5c28))
+
 ## [1.6.4](https://github.com/adobe/helix-universal/compare/v1.6.3...v1.6.4) (2021-07-07)
 
 
