@@ -16,8 +16,8 @@ let AWS;
 class AWSStorage extends Storage {
   static async presignURL(bucket, path, blobParams = {}, method = 'GET', expires = 60) {
     if (!AWS) {
-      // eslint-disable-next-line global-require, import/no-extraneous-dependencies
-      AWS = require('aws-sdk');
+      // eslint-disable-next-line import/no-unresolved, global-require,import/no-extraneous-dependencies
+      AWS = await import('aws-sdk');
 
       AWS.config.update({
         region: process.env.AWS_REGION || 'us-east-1',
