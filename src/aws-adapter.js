@@ -18,6 +18,7 @@ const {
 } = require('./utils.js');
 const getAWSSecrets = require('./aws-package-params.js');
 const { AWSResolver } = require('./resolver.js');
+const { AWSStorage } = require('./aws-storage');
 
 /**
  * The (inner) universal adapter for lambda functions with the secrets already retrieved
@@ -72,6 +73,7 @@ async function lambdaAdapter(event, context, secrets = {}) {
         ...process.env,
         ...secrets,
       },
+      storage: AWSStorage,
     };
 
     // support for Amazon SQS, remember records passed by trigger
@@ -113,6 +115,10 @@ async function lambdaAdapter(event, context, secrets = {}) {
     }
     // eslint-disable-next-line no-console
     console.error('error while invoking function', e);
+    if (event.nonHttp) {
+      // let caller see the exception thrown
+      throw e;
+    }
     return {
       statusCode: 500,
       headers: {
@@ -133,8 +139,11 @@ async function lambdaAdapter(event, context, secrets = {}) {
  */
 async function lambda(evt, ctx) {
   try {
+    evt.nonHttp = (!evt.requestContext);
+
     const secrets = await getAWSSecrets(ctx.functionName);
     let handler = (event, context) => lambdaAdapter(event, context, secrets);
+
     if (secrets.EPSAGON_TOKEN) {
       // check if health check
       const suffix = evt.pathParameters && evt.pathParameters.path ? `/${evt.pathParameters.path}` : '';
@@ -144,8 +153,8 @@ async function lambda(evt, ctx) {
         });
       }
     }
-    if (!evt.requestContext) {
-      // function was invoked directly, not through API Gateway
+    if (evt.nonHttp) {
+      // mimic minimal requirements for our environment setup in lambdaAdapter
       const searchParams = new URLSearchParams();
       Object.getOwnPropertyNames(evt).forEach((name) => {
         const value = evt[name];
@@ -160,6 +169,10 @@ async function lambda(evt, ctx) {
     }
     return handler(evt, ctx);
   } catch (e) {
+    if (evt.nonHttp) {
+      // let caller see the exception thrown
+      throw e;
+    }
     return {
       statusCode: e.statusCode || 500,
       headers: {

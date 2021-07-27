@@ -1,3 +1,52 @@
+## [1.6.5](https://github.com/adobe/helix-universal/compare/v1.6.4...v1.6.5) (2021-07-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-epsagon to v1.6.8 ([#46](https://github.com/adobe/helix-universal/issues/46)) ([e8c40c9](https://github.com/adobe/helix-universal/commit/e8c40c97cf806827ce09bafc03b62bfb1bdc5c28))
+
+## [1.6.4](https://github.com/adobe/helix-universal/compare/v1.6.3...v1.6.4) (2021-07-07)
+
+
+### Bug Fixes
+
+* support delivery failure ([#44](https://github.com/adobe/helix-universal/issues/44)) ([e25892b](https://github.com/adobe/helix-universal/commit/e25892bf4b7a47dd0c8d232c0c6cdd5ab852cc71))
+
+## [1.6.3](https://github.com/adobe/helix-universal/compare/v1.6.2...v1.6.3) (2021-06-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-fetch to v2.3.0 ([a560a35](https://github.com/adobe/helix-universal/commit/a560a353e27a99d2d444c484bf4cd8d38e0afe28))
+
+## [1.6.2](https://github.com/adobe/helix-universal/compare/v1.6.1...v1.6.2) (2021-06-03)
+
+
+### Bug Fixes
+
+* add possibility to specify blob options for storage api ([#36](https://github.com/adobe/helix-universal/issues/36)) ([93e0d6d](https://github.com/adobe/helix-universal/commit/93e0d6d8ea7b82fdf1c9e0f9df026b732b5b5635)), closes [#35](https://github.com/adobe/helix-universal/issues/35)
+
+## [1.6.1](https://github.com/adobe/helix-universal/compare/v1.6.0...v1.6.1) (2021-05-31)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-epsagon to v1.6.7 ([#33](https://github.com/adobe/helix-universal/issues/33)) ([71d6976](https://github.com/adobe/helix-universal/commit/71d6976b9b29350f786b1bd663d87b5ed74e67c0))
+
+# [1.6.0](https://github.com/adobe/helix-universal/compare/v1.5.1...v1.6.0) (2021-05-27)
+
+
+### Bug Fixes
+
+* **aws:** use correct operation names ([177f303](https://github.com/adobe/helix-universal/commit/177f30390763c0aaab6414442ce0249ba793118e))
+
+
+### Features
+
+* **aws:** add storage api ([a078cac](https://github.com/adobe/helix-universal/commit/a078cac28c84642bd97b9e379309352c2d7f7368)), closes [#25](https://github.com/adobe/helix-universal/issues/25)
+* **google:** add google storage api ([da3234d](https://github.com/adobe/helix-universal/commit/da3234ddb68c7d3a282b10e89fb06281df930624))
+* **google:** expose storage api in context for google ([e5fc7dd](https://github.com/adobe/helix-universal/commit/e5fc7ddb26073bff2365d246a0b1e94855cde35d)), closes [#25](https://github.com/adobe/helix-universal/issues/25)
+
 ## [1.5.1](https://github.com/adobe/helix-universal/compare/v1.5.0...v1.5.1) (2021-05-17)
 
 

@@ -402,4 +402,46 @@ describe('Adapter tests for AWS', () => {
     );
     assert.equal(res.statusCode, 200);
   });
+
+  it('handles errors when run without requestContext', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: () => {
+          throw new Error('function kaput');
+        },
+      },
+      './aws-package-params.js': () => ({}),
+    });
+    await assert.rejects(async () => lambda(
+      {
+        key1: 'value1',
+        key2: 'value2',
+        key3: 'value3',
+        other: {},
+      },
+      DEFAULT_CONTEXT,
+    ));
+  });
+
+  it('handles errors from lambda setup when run without requestContext', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: () => {
+          throw new Error('function kaput');
+        },
+      },
+      './aws-package-params.js': () => {
+        throw new Error('package params kaput');
+      },
+    });
+    await assert.rejects(async () => lambda(
+      {
+        key1: 'value1',
+        key2: 'value2',
+        key3: 'value3',
+        other: {},
+      },
+      DEFAULT_CONTEXT,
+    ));
+  });
 });

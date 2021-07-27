@@ -17,6 +17,7 @@ const {
 const getGoogleSecrets = require('./google-package-params.js');
 
 const { GoogleResolver } = require('./resolver.js');
+const { GoogleStorage } = require('./google-storage.js');
 
 /**
  * Universal adapter for google cloud functions.
@@ -64,6 +65,7 @@ async function googleAdapter(req, res, secrets = {}) {
         ...process.env,
         ...secrets,
       },
+      storage: GoogleStorage,
     };
 
     updateProcessEnv(context);
