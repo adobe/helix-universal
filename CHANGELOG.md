@@ -1,3 +1,10 @@
+## [1.6.6](https://github.com/adobe/helix-universal/compare/v1.6.5...v1.6.6) (2021-07-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-fetch to v2.4.1 ([#49](https://github.com/adobe/helix-universal/issues/49)) ([433da69](https://github.com/adobe/helix-universal/commit/433da69f21ddeb19ae27ead8c18a86311a4319ae))
+
 ## [1.6.5](https://github.com/adobe/helix-universal/compare/v1.6.4...v1.6.5) (2021-07-13)
 
 
