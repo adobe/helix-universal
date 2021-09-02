@@ -1,3 +1,10 @@
+## [1.6.8](https://github.com/adobe/helix-universal/compare/v1.6.7...v1.6.8) (2021-09-02)
+
+
+### Bug Fixes
+
+* local env should override package params ([#57](https://github.com/adobe/helix-universal/issues/57)) ([b6fb94a](https://github.com/adobe/helix-universal/commit/b6fb94a4d787e7d4c036e0a3a258066d80950b61))
+
 ## [1.6.7](https://github.com/adobe/helix-universal/compare/v1.6.6...v1.6.7) (2021-08-18)
 
 
