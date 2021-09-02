@@ -62,8 +62,8 @@ async function googleAdapter(req, res, secrets = {}) {
         requestId: request.headers.get('x-cloud-trace-context'),
       },
       env: {
-        ...process.env,
         ...secrets,
+        ...process.env,
       },
       storage: GoogleStorage,
     };
