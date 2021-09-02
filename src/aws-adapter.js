@@ -70,8 +70,8 @@ async function lambdaAdapter(event, context, secrets = {}) {
         requestId: event.requestContext.requestId,
       },
       env: {
-        ...process.env,
         ...secrets,
+        ...process.env,
       },
       storage: AWSStorage,
     };

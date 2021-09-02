@@ -44,6 +44,14 @@ function createMockRequest(url, headers) {
 }
 
 describe('Adapter tests for Google', () => {
+  beforeEach(() => {
+    process.env.GOOGLE_TEST_PARAM = '123';
+  });
+
+  afterEach(() => {
+    delete process.env.GOOGLE_TEST_PARAM;
+  });
+
   it('handles illegal request headers with 400', async () => {
     process.env.K_SERVICE = 'helix-services--content-proxy';
     process.env.K_REVISION = '4.3.1';
@@ -88,7 +96,7 @@ describe('Adapter tests for Google', () => {
     });
   });
 
-  it('provides package params', async () => {
+  it('provides package params, local env wins', async () => {
     process.env.K_SERVICE = 'helix-services--content-proxy';
     process.env.K_REVISION = '4.3.1';
     const google = proxyquire('../src/google-adapter.js', {
@@ -97,6 +105,7 @@ describe('Adapter tests for Google', () => {
       },
       './google-package-params.js': () => ({
         SOME_SECRET: 'pssst',
+        GOOGLE_TEST_PARAM: 'abc',
       }),
     });
 
@@ -108,9 +117,12 @@ describe('Adapter tests for Google', () => {
     await google(req, res);
     assert.equal(res.code, 200);
     const body = JSON.parse(res.body);
-    Object.keys(process.env).forEach((key) => delete body[key]);
+    Object.keys(process.env)
+      .filter((key) => key !== 'GOOGLE_TEST_PARAM')
+      .forEach((key) => delete body[key]);
     assert.deepEqual(body, {
       SOME_SECRET: 'pssst',
+      GOOGLE_TEST_PARAM: '123',
     });
   });
 
