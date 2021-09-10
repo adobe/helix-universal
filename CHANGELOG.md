@@ -1,3 +1,10 @@
+## [1.6.9](https://github.com/adobe/helix-universal/compare/v1.6.8...v1.6.9) (2021-09-10)
+
+
+### Bug Fixes
+
+* increase parameter cache to 1 hour ([#59](https://github.com/adobe/helix-universal/issues/59)) ([c36cf34](https://github.com/adobe/helix-universal/commit/c36cf34bf6b13946a425647242a346a7b5070deb))
+
 ## [1.6.8](https://github.com/adobe/helix-universal/compare/v1.6.7...v1.6.8) (2021-09-02)
 
 
