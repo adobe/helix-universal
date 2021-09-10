@@ -11,6 +11,8 @@
  */
 const { promisify } = require('util');
 
+const CACHE_EXPIRATION = 60 * 60 * 1000; // 1 hour
+
 const cache = {
   expiration: 0,
   data: null,
@@ -71,7 +73,7 @@ async function getAWSSecrets(functionName) {
     console.info(`loaded ${Object.entries(params).length} package parameter in ${nower - now}ms`);
     if (params) {
       cache.data = params;
-      cache.expiration = nower + 60000;
+      cache.expiration = nower + CACHE_EXPIRATION;
     }
   }
   return cache.data;
