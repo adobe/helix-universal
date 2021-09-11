@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/adobe/helix-universal#readme",
   "dependencies": {
-    "@adobe/helix-epsagon": "1.6.8",
+    "@adobe/helix-epsagon": "1.6.9",
     "@adobe/helix-fetch": "2.4.2"
   },
   "devDependencies": {
