@@ -9,24 +9,18 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+/* eslint-env serviceworker */
 
-const { Request, Response } = require('@adobe/helix-fetch');
-const aws = require('./aws-adapter.js');
-const openwhisk = require('./openwhisk-adapter.js');
-const azure = require('./azure-adapter.js');
-const google = require('./google-adapter.js');
-const fastly = require('./fastly-adapter.js');
-const cloudflare = require('./cloudflare-adapter.js');
+async function handler(event) {
+  const { request } = event;
+  return new Response(`cloudflare ${request.url}`);
+}
 
-module.exports = {
-  Request,
-  Response,
-  adapter: {
-    openwhisk,
-    aws,
-    google,
-    azure,
-    fastly,
-    cloudflare,
-  },
-};
+function cloudflare() {
+  if (caches.default) {
+    return handler;
+  }
+  return false;
+}
+
+module.exports = cloudflare;
