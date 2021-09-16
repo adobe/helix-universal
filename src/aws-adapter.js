@@ -29,9 +29,15 @@ const { AWSStorage } = require('./aws-storage');
  */
 async function lambdaAdapter(event, context, secrets = {}) {
   try {
+    // add cookie header if missing
+    const { headers } = event;
+    if (!headers.cookie && event.cookies) {
+      headers.cookie = event.cookies.join(';');
+    }
+
     const request = new Request(`https://${event.requestContext.domainName}${event.rawPath}${event.rawQueryString ? '?' : ''}${event.rawQueryString}`, {
       method: event.requestContext.http.method,
-      headers: event.headers,
+      headers,
       body: event.isBase64Encoded ? Buffer.from(event.body, 'base64') : event.body,
     });
 
