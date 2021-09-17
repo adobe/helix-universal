@@ -1,3 +1,10 @@
+## [1.6.12](https://github.com/adobe/helix-universal/compare/v1.6.11...v1.6.12) (2021-09-17)
+
+
+### Bug Fixes
+
+* also respect content-encoding when calculating if response is binary ([#64](https://github.com/adobe/helix-universal/issues/64)) ([ff1b035](https://github.com/adobe/helix-universal/commit/ff1b03550a083f463cd797ea33af02f0ec902146)), closes [#28](https://github.com/adobe/helix-universal/issues/28)
+
 ## [1.6.11](https://github.com/adobe/helix-universal/compare/v1.6.10...v1.6.11) (2021-09-17)
 
 
