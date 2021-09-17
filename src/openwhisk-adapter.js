@@ -14,7 +14,7 @@ const querystring = require('querystring');
 const { Request } = require('@adobe/helix-fetch');
 const { epsagon } = require('@adobe/helix-epsagon');
 const {
-  isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, HEALTHCHECK_PATH,
+  isBinary, isBinaryType, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, HEALTHCHECK_PATH,
   cleanupHeaderValue,
 } = require('./utils.js');
 
@@ -38,7 +38,7 @@ async function openwhiskAdapter(params) {
 
     let body;
     if (!/^(GET|HEAD)$/i.test(method)) {
-      body = isBinary(headers['content-type'])
+      body = isBinaryType(headers['content-type'])
         ? Buffer.from(rawBody, 'base64')
         : rawBody;
       // binaries and JSON (!) are base64 encoded
@@ -113,7 +113,7 @@ async function openwhiskAdapter(params) {
     ensureUTF8Charset(response);
     ensureInvocationId(response, context);
 
-    const isBase64Encoded = isBinary(response.headers.get('content-type'));
+    const isBase64Encoded = isBinary(response.headers);
     return {
       statusCode: response.status,
       headers: Object.fromEntries(response.headers.entries()),

@@ -76,7 +76,12 @@ async function googleAdapter(req, res, secrets = {}) {
     ensureUTF8Charset(response);
     ensureInvocationId(response, context);
 
-    Array.from(response.headers.entries()).reduce((r, [header, value]) => r.set(header, value), res.status(response.status)).send(isBinary(response.headers.get('content-type')) ? Buffer.from(await response.arrayBuffer()) : await response.text());
+    const body = isBinary(response.headers)
+      ? Buffer.from(await response.arrayBuffer())
+      : await response.text();
+    Array.from(response.headers.entries())
+      .reduce((r, [header, value]) => r.set(header, value), res.status(response.status))
+      .send(body);
   } catch (e) {
     if (e instanceof TypeError && e.code === 'ERR_INVALID_CHAR') {
       // eslint-disable-next-line no-console
