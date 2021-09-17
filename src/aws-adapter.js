@@ -99,7 +99,7 @@ async function lambdaAdapter(event, context, secrets = {}) {
     if (con.log && con.log.flush) {
       await con.log.flush();
     }
-    const isBase64Encoded = isBinary(response.headers.get('content-type'));
+    const isBase64Encoded = isBinary(response.headers);
     return {
       statusCode: response.status,
       headers: Object.fromEntries(response.headers.entries()),

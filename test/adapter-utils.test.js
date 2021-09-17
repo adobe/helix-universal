@@ -96,14 +96,24 @@ describe('Adapter Utils Tests: ensureInvocationId', () => {
 });
 
 describe('Adapter Utils Tests: isBinary', () => {
+  function headers(type, encoding) {
+    const hdr = new Map();
+    hdr.set('content-type', type);
+    if (encoding) {
+      hdr.set('content-encoding', encoding);
+    }
+    return hdr;
+  }
+
   it('produces correct result', async () => {
-    assert.ok(isBinary('application/octet-stream'));
-    assert.ok(isBinary('image/png'));
-    assert.ok(!isBinary('text/html'));
-    assert.ok(!isBinary('application/javascript'));
-    assert.ok(!isBinary('application/json'));
-    assert.ok(!isBinary('text/xml'));
-    assert.ok(isBinary('image/svg+xml'));
-    assert.ok(isBinary('text/yaml'));
+    assert.ok(isBinary(headers('application/octet-stream')));
+    assert.ok(isBinary(headers('image/png')));
+    assert.ok(isBinary(headers('image/svg+xml')));
+    assert.ok(isBinary(headers('text/yaml')));
+    assert.ok(!isBinary(headers('text/html')));
+    assert.ok(!isBinary(headers('application/javascript')));
+    assert.ok(!isBinary(headers('application/json')));
+    assert.ok(!isBinary(headers('text/xml')));
+    assert.ok(isBinary(headers('text/html', 'gzip')));
   });
 });

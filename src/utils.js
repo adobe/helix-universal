@@ -16,7 +16,7 @@ const { inspect } = require('util');
  * @param {string} type - content type
  * @returns {boolean} {@code true} if content type is binary.
  */
-function isBinary(type) {
+function isBinaryType(type) {
   if (!type) {
     return true;
   }
@@ -26,6 +26,20 @@ function isBinary(type) {
   }
   // eslint-disable-next-line no-use-before-define
   return !textTypes.has(type);
+}
+
+/**
+ * Checks if the response is binary according to content-type or content-encoding.
+ * @param {Map} headers response headers
+ * @returns {boolean} {@code true} if response is binary.
+ */
+function isBinary(headers) {
+  // assume all encoding to be binary
+  if (headers.get('content-encoding')) {
+    return true;
+  }
+
+  return isBinaryType(headers.get('content-type'));
 }
 
 /**
@@ -92,6 +106,7 @@ const HEALTHCHECK_PATH = '/_status_check/healthcheck.json';
 
 module.exports = {
   isBinary,
+  isBinaryType,
   ensureUTF8Charset,
   ensureInvocationId,
   updateProcessEnv,
