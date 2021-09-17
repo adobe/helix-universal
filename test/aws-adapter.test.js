@@ -344,6 +344,65 @@ describe('Adapter tests for AWS', () => {
     assert.equal(res.statusCode, 200);
   });
 
+  it('handles event cookies params', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async (request, context) => {
+          assert.deepStrictEqual(request.headers.plain(), {
+            cookie: 'name1=value1;name2=value2',
+            host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+          });
+          return new Response('okay');
+        },
+        '@noCallThru': true,
+      },
+      './aws-package-params.js': () => ({}),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT,
+      cookies: [
+        'name1=value1',
+        'name2=value2',
+      ],
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.equal(res.statusCode, 200);
+  });
+
+  it('handles preserves cookie header', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async (request, context) => {
+          assert.deepStrictEqual(request.headers.plain(), {
+            cookie: 'name1=value1;name2=value2',
+            host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+          });
+          return new Response('okay');
+        },
+        '@noCallThru': true,
+      },
+      './aws-package-params.js': () => ({}),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT,
+      cookies: [
+      ],
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+        cookie: 'name1=value1;name2=value2',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.equal(res.statusCode, 200);
+  });
+
   it('can be run without requestContext', async () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
