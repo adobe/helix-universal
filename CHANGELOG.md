@@ -1,3 +1,10 @@
+## [1.6.11](https://github.com/adobe/helix-universal/compare/v1.6.10...v1.6.11) (2021-09-17)
+
+
+### Bug Fixes
+
+* ensure cookie header is not lost in aws ([#63](https://github.com/adobe/helix-universal/issues/63)) ([d27d13d](https://github.com/adobe/helix-universal/commit/d27d13da393a9919164244dfb10ac721a12c0d6f)), closes [#62](https://github.com/adobe/helix-universal/issues/62)
+
 ## [1.6.10](https://github.com/adobe/helix-universal/compare/v1.6.9...v1.6.10) (2021-09-11)
 
 

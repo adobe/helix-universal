@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-universal",
-  "version": "1.6.10",
+  "version": "1.6.11",
   "description": "Helix Universal",
   "main": "src/index.js",
   "types": "src/index.d.ts",
