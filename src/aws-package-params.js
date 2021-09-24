@@ -28,40 +28,25 @@ async function loadAWSSecrets(functionName) {
     logger: console,
   });
 
-  const ssm = new AWS.SSM();
-  ssm.getParametersByPath = promisify(ssm.getParametersByPath.bind(ssm));
+  const sm = new AWS.SecretsManager();
+  sm.getSecretValue = promisify(sm.getSecretValue.bind(sm));
 
-  let params = [];
-  let nextToken;
+  const SecretId = `/helix-deploy/${functionName.replace(/--.*/, '')}/all`;
   try {
-    do {
-      const opts = {
-        Path: `/helix-deploy/${functionName.replace(/--.*/, '')}/`,
-        WithDecryption: true,
-      };
-      if (nextToken) {
-        opts.NextToken = nextToken;
-      }
-      // eslint-disable-next-line no-await-in-loop
-      const res = await ssm.getParametersByPath(opts);
-      nextToken = res.NextToken;
-      params = params.concat(res.Parameters);
-    } while (nextToken);
+    const { SecretString } = await sm.getSecretValue({ SecretId });
+    return JSON.parse(SecretString);
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.error('unable to load function params', e);
+    console.error(`unable to load function params from '${SecretId}'`, e);
     const error = new Error('unable to load function params');
     if (e.code === 'ThrottlingException') {
       error.statusCode = 429;
     }
+    if (e.code === 'ResourceNotFoundException') {
+      return {};
+    }
     throw error;
   }
-
-  return params.reduce((p, param) => {
-    // eslint-disable-next-line no-param-reassign
-    p[param.Name.replace(/.*\//, '')] = param.Value;
-    return p;
-  }, {});
 }
 
 async function getAWSSecrets(functionName) {
