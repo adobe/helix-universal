@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/adobe/helix-universal/compare/v1.6.12...v1.7.0) (2021-09-27)
+
+
+### Features
+
+* use secrets-manager ([#68](https://github.com/adobe/helix-universal/issues/68)) ([95afc76](https://github.com/adobe/helix-universal/commit/95afc762ac754f4ed83096860a6bec76bb92fa7d)), closes [#67](https://github.com/adobe/helix-universal/issues/67)
+
 ## [1.6.12](https://github.com/adobe/helix-universal/compare/v1.6.11...v1.6.12) (2021-09-17)
 
 
