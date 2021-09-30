@@ -12,3 +12,39 @@
 export { Request, Response } from '@adobe/helix-fetch';
 export { Resolver } from './resolver';
 export * from './adapter';
+
+import {UniversalContext as _UniversalContext} from './adapter';
+
+/**
+ * Namespace declaration with interfaces that wrappers can extend.
+ * 
+ * @example
+ * ```ts
+ * // Extend in a wrapper declaration via merging
+ * declare module '@adobe/helix-universal' {
+ *   namespace HelixUniversal {
+ *     export interface UniversalContext {
+ *       foo: () => void;
+ *     }
+ *   }
+ * }
+ * ```
+ * 
+ * @example
+ * ```ts
+ * // Use merged interface as a type
+ * import { HelixUniversal } from '@adobe/helix-universal';
+ * 
+ * async function main(request: Request, context: HelixUniversal.UniversalContext) {
+ *   const bar = context.foo();
+ * }
+ * 
+ * ```
+ */
+declare module '@adobe/helix-universal' {
+  namespace HelixUniversal {
+    export interface UniversalContext extends _UniversalContext {
+
+    }
+  }
+}
