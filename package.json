@@ -27,7 +27,7 @@
     "@adobe/helix-fetch": "2.4.2"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "1.1.5",
+    "@adobe/eslint-config-helix": "1.2.0",
     "@google-cloud/storage": "5.14.3",
     "@semantic-release/changelog": "6.0.0",
     "@semantic-release/git": "10.0.0",
