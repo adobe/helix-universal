@@ -22,7 +22,7 @@ import {UniversalContext as _UniversalContext} from './adapter';
  * ```ts
  * // Extend in a wrapper declaration via merging
  * declare module '@adobe/helix-universal' {
- *   namespace HelixUniversal {
+ *   namespace Helix {
  *     export interface UniversalContext {
  *       foo: () => void;
  *     }
@@ -33,18 +33,18 @@ import {UniversalContext as _UniversalContext} from './adapter';
  * @example
  * ```ts
  * // Use merged interface as a type
- * import { HelixUniversal } from '@adobe/helix-universal';
+ * import type { Helix } from '@adobe/helix-universal';
  * 
- * async function main(request: Request, context: HelixUniversal.UniversalContext) {
+ * async function main(request: Request, context: Helix.UniversalContext) {
  *   const bar = context.foo();
  * }
  * 
  * ```
  */
 declare module '@adobe/helix-universal' {
-  namespace HelixUniversal {
+  namespace Helix {
     export interface UniversalContext extends _UniversalContext {
-
+      [key: string]: unknown;
     }
   }
 }
