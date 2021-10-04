@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/adobe/helix-universal/compare/v1.7.0...v1.8.0) (2021-10-04)
+
+
+### Features
+
+* add namespace for context types ([#71](https://github.com/adobe/helix-universal/issues/71)) ([2858890](https://github.com/adobe/helix-universal/commit/28588905c870a36a35971712119f075e56a39e8b))
+
 # [1.7.0](https://github.com/adobe/helix-universal/compare/v1.6.12...v1.7.0) (2021-09-27)
 
 
