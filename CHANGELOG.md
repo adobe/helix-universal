@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/adobe/helix-universal/compare/v1.8.1...v1.9.0) (2021-10-19)
+
+
+### Features
+
+* use `import` for non toplevel module imports ([#26](https://github.com/adobe/helix-universal/issues/26)) ([a6191db](https://github.com/adobe/helix-universal/commit/a6191dbc0e045b8e4e846ee27e6f02a1f5554981))
+
 ## [1.8.1](https://github.com/adobe/helix-universal/compare/v1.8.0...v1.8.1) (2021-10-18)
 
 
