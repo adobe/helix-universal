@@ -63,6 +63,14 @@ const DEFAULT_CONTEXT = {
 };
 
 describe('Adapter tests for AWS', () => {
+  beforeEach(() => {
+    process.env.AWS_TEST_PARAM = '123';
+  });
+
+  afterEach(() => {
+    delete process.env.AWS_TEST_PARAM;
+  });
+
   it('context.func', async () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
@@ -83,21 +91,25 @@ describe('Adapter tests for AWS', () => {
     assert.equal(res.statusCode, 200);
   });
 
-  it('provides package params', async () => {
+  it('provides package params, local env wins', async () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
       './aws-package-params.js': () => ({
         SOME_SECRET: 'pssst',
+        AWS_TEST_PARAM: 'abc',
       }),
     });
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
     assert.equal(res.statusCode, 200);
     const body = JSON.parse(res.body);
-    Object.keys(process.env).forEach((key) => delete body[key]);
+    Object.keys(process.env)
+      .filter((key) => key !== 'AWS_TEST_PARAM')
+      .forEach((key) => delete body[key]);
     assert.deepEqual(body, {
       SOME_SECRET: 'pssst',
+      AWS_TEST_PARAM: '123',
     });
   });
 
@@ -327,6 +339,65 @@ describe('Adapter tests for AWS', () => {
       rawQueryString: 'foo=bar',
       headers: {
         host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.equal(res.statusCode, 200);
+  });
+
+  it('handles event cookies params', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async (request, context) => {
+          assert.deepStrictEqual(request.headers.plain(), {
+            cookie: 'name1=value1;name2=value2',
+            host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+          });
+          return new Response('okay');
+        },
+        '@noCallThru': true,
+      },
+      './aws-package-params.js': () => ({}),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT,
+      cookies: [
+        'name1=value1',
+        'name2=value2',
+      ],
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.equal(res.statusCode, 200);
+  });
+
+  it('handles preserves cookie header', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async (request, context) => {
+          assert.deepStrictEqual(request.headers.plain(), {
+            cookie: 'name1=value1;name2=value2',
+            host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+          });
+          return new Response('okay');
+        },
+        '@noCallThru': true,
+      },
+      './aws-package-params.js': () => ({}),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT,
+      cookies: [
+      ],
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+        cookie: 'name1=value1;name2=value2',
       },
     }, DEFAULT_CONTEXT);
     assert.equal(res.statusCode, 200);

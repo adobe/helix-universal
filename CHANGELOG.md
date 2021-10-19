@@ -1,3 +1,73 @@
+## [1.8.1](https://github.com/adobe/helix-universal/compare/v1.8.0...v1.8.1) (2021-10-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-fetch to v3 ([#78](https://github.com/adobe/helix-universal/issues/78)) ([dcd33bb](https://github.com/adobe/helix-universal/commit/dcd33bbd400c92e98d38c9b7448ce505caed68b5))
+
+# [1.8.0](https://github.com/adobe/helix-universal/compare/v1.7.0...v1.8.0) (2021-10-04)
+
+
+### Features
+
+* add namespace for context types ([#71](https://github.com/adobe/helix-universal/issues/71)) ([2858890](https://github.com/adobe/helix-universal/commit/28588905c870a36a35971712119f075e56a39e8b))
+
+# [1.7.0](https://github.com/adobe/helix-universal/compare/v1.6.12...v1.7.0) (2021-09-27)
+
+
+### Features
+
+* use secrets-manager ([#68](https://github.com/adobe/helix-universal/issues/68)) ([95afc76](https://github.com/adobe/helix-universal/commit/95afc762ac754f4ed83096860a6bec76bb92fa7d)), closes [#67](https://github.com/adobe/helix-universal/issues/67)
+
+## [1.6.12](https://github.com/adobe/helix-universal/compare/v1.6.11...v1.6.12) (2021-09-17)
+
+
+### Bug Fixes
+
+* also respect content-encoding when calculating if response is binary ([#64](https://github.com/adobe/helix-universal/issues/64)) ([ff1b035](https://github.com/adobe/helix-universal/commit/ff1b03550a083f463cd797ea33af02f0ec902146)), closes [#28](https://github.com/adobe/helix-universal/issues/28)
+
+## [1.6.11](https://github.com/adobe/helix-universal/compare/v1.6.10...v1.6.11) (2021-09-17)
+
+
+### Bug Fixes
+
+* ensure cookie header is not lost in aws ([#63](https://github.com/adobe/helix-universal/issues/63)) ([d27d13d](https://github.com/adobe/helix-universal/commit/d27d13da393a9919164244dfb10ac721a12c0d6f)), closes [#62](https://github.com/adobe/helix-universal/issues/62)
+
+## [1.6.10](https://github.com/adobe/helix-universal/compare/v1.6.9...v1.6.10) (2021-09-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-epsagon to v1.6.9 ([31a5905](https://github.com/adobe/helix-universal/commit/31a59055de612932fee02de5f6c2b7af1064889c))
+
+## [1.6.9](https://github.com/adobe/helix-universal/compare/v1.6.8...v1.6.9) (2021-09-10)
+
+
+### Bug Fixes
+
+* increase parameter cache to 1 hour ([#59](https://github.com/adobe/helix-universal/issues/59)) ([c36cf34](https://github.com/adobe/helix-universal/commit/c36cf34bf6b13946a425647242a346a7b5070deb))
+
+## [1.6.8](https://github.com/adobe/helix-universal/compare/v1.6.7...v1.6.8) (2021-09-02)
+
+
+### Bug Fixes
+
+* local env should override package params ([#57](https://github.com/adobe/helix-universal/issues/57)) ([b6fb94a](https://github.com/adobe/helix-universal/commit/b6fb94a4d787e7d4c036e0a3a258066d80950b61))
+
+## [1.6.7](https://github.com/adobe/helix-universal/compare/v1.6.6...v1.6.7) (2021-08-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-fetch to v2.4.2 ([5ab480d](https://github.com/adobe/helix-universal/commit/5ab480db494bd994721a46ece87482e42c9d60ce))
+
+## [1.6.6](https://github.com/adobe/helix-universal/compare/v1.6.5...v1.6.6) (2021-07-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-fetch to v2.4.1 ([#49](https://github.com/adobe/helix-universal/issues/49)) ([433da69](https://github.com/adobe/helix-universal/commit/433da69f21ddeb19ae27ead8c18a86311a4319ae))
+
 ## [1.6.5](https://github.com/adobe/helix-universal/compare/v1.6.4...v1.6.5) (2021-07-13)
 
 

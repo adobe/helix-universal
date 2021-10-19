@@ -83,11 +83,12 @@ async function azure(context, req) {
     ensureUTF8Charset(response);
     ensureInvocationId(response, con);
 
+    const isRaw = isBinary(response.headers);
     context.res = {
       status: response.status,
       headers: Object.fromEntries(response.headers.entries()),
-      isRaw: isBinary(response.headers.get('content-type')),
-      body: isBinary(response.headers.get('content-type')) ? Buffer.from(await response.arrayBuffer()) : await response.text(),
+      isRaw,
+      body: isRaw ? Buffer.from(await response.arrayBuffer()) : await response.text(),
     };
   } catch (e) {
     if (e instanceof TypeError && e.code === 'ERR_INVALID_CHAR') {

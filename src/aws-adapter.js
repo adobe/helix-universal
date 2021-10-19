@@ -29,9 +29,15 @@ const { AWSStorage } = require('./aws-storage');
  */
 async function lambdaAdapter(event, context, secrets = {}) {
   try {
+    // add cookie header if missing
+    const { headers } = event;
+    if (!headers.cookie && event.cookies) {
+      headers.cookie = event.cookies.join(';');
+    }
+
     const request = new Request(`https://${event.requestContext.domainName}${event.rawPath}${event.rawQueryString ? '?' : ''}${event.rawQueryString}`, {
       method: event.requestContext.http.method,
-      headers: event.headers,
+      headers,
       body: event.isBase64Encoded ? Buffer.from(event.body, 'base64') : event.body,
     });
 
@@ -70,8 +76,8 @@ async function lambdaAdapter(event, context, secrets = {}) {
         requestId: event.requestContext.requestId,
       },
       env: {
-        ...process.env,
         ...secrets,
+        ...process.env,
       },
       storage: AWSStorage,
     };
@@ -93,7 +99,7 @@ async function lambdaAdapter(event, context, secrets = {}) {
     if (con.log && con.log.flush) {
       await con.log.flush();
     }
-    const isBase64Encoded = isBinary(response.headers.get('content-type'));
+    const isBase64Encoded = isBinary(response.headers);
     return {
       statusCode: response.status,
       headers: Object.fromEntries(response.headers.entries()),
