@@ -13,9 +13,27 @@
 const { Response } = require('@adobe/helix-fetch');
 const assert = require('assert');
 const proxyquire = require('proxyquire').noCallThru();
+const fse = require('fs-extra');
+const { createTestRoot } = require('./utils.js');
 
 describe('Adapter tests for Azure', () => {
+  let testRoot;
+  let cwd;
+  beforeEach(async () => {
+    testRoot = await createTestRoot();
+    cwd = process.cwd();
+    process.chdir(testRoot);
+  });
+
+  afterEach(async () => {
+    process.chdir(cwd);
+    await fse.remove(testRoot);
+  });
+
   it('context.pathInfo.suffix', async () => {
+    await fse.writeJson('./params.json', {
+      FOO: 'bar',
+    });
     const azure = proxyquire('../src/azure-adapter.js', {
       './main.js': {
         main: (request, context) => {

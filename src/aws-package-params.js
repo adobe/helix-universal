@@ -20,8 +20,8 @@ const cache = {
 
 async function loadAWSSecrets(functionName) {
   // delay the import so that other runtimes do not have to care
-  // eslint-disable-next-line import/no-unresolved, global-require,import/no-extraneous-dependencies
-  const AWS = require('aws-sdk');
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const AWS = (await import('aws-sdk')).default;
 
   AWS.config.update({
     region: process.env.AWS_REGION,
