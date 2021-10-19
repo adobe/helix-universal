@@ -17,7 +17,7 @@ let storage;
 class GoogleStorage extends AbstractStorage {
   static async presignURL(bucket, path, blobParams = {}, method = 'GET', expires = 60) {
     if (!storage) {
-      // eslint-disable-next-line import/no-unresolved, global-require,import/no-extraneous-dependencies
+      // eslint-disable-next-line import/no-extraneous-dependencies
       const { Storage } = await import('@google-cloud/storage');
       storage = new Storage();
     }

@@ -10,11 +10,14 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
+const fs = require('fs').promises;
 const { Request } = require('@adobe/helix-fetch');
 const {
   isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, cleanupHeaderValue,
 } = require('./utils.js');
 const { AzureResolver } = require('./resolver.js');
+
+let params;
 
 /**
  * Universal adapter for Azure functions
@@ -24,8 +27,15 @@ const { AzureResolver } = require('./resolver.js');
  */
 async function azure(context, req) {
   context.log('JavaScript HTTP trigger function processed a request.');
-  // eslint-disable-next-line global-require, import/no-unresolved
-  const params = await import('./params.json');
+
+  /* istanbul ignore next */
+  if (!params) {
+    try {
+      params = JSON.parse(await fs.readFile('./params.json', 'utf-8'));
+    } catch {
+      params = {};
+    }
+  }
 
   let body;
   if (!/^(GET|HEAD)$/i.test(req.method)) {

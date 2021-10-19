@@ -16,7 +16,7 @@ async function getGoogleSecrets(functionName, projectID) {
   const name = `${parent}/secrets/helix-deploy--${packageName}/versions/latest`;
   try {
     // delay the import so that other runtimes do not have to care
-    // eslint-disable-next-line  import/no-unresolved, global-require
+    // eslint-disable-next-line import/no-unresolved,import/no-extraneous-dependencies
     const { SecretManagerServiceClient } = await import('@google-cloud/secret-manager');
 
     // hope that the credentials appear by magic
@@ -26,6 +26,7 @@ async function getGoogleSecrets(functionName, projectID) {
       name,
     });
 
+    /* istanbul ignore next */
     return JSON.parse(version.payload.data.toString());
   } catch (err) {
     // eslint-disable-next-line no-console
