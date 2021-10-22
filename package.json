@@ -4,6 +4,7 @@
   "description": "Helix Universal",
   "main": "src/index.js",
   "types": "src/index.d.ts",
+  "type": "module",
   "scripts": {
     "test": " nyc mocha --exit",
     "test-ci": "nyc mocha --exit --reporter xunit --reporter-options output=./junit/test-results.xml && codecov",

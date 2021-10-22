@@ -10,15 +10,15 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
-const { Request } = require('@adobe/helix-fetch');
-const { epsagon } = require('@adobe/helix-epsagon');
-const {
+import { Request} from '@adobe/helix-fetch';
+// const { epsagon } = require('@adobe/helix-epsagon');
+import {
   isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, HEALTHCHECK_PATH,
   cleanupHeaderValue,
-} = require('./utils.js');
-const getAWSSecrets = require('./aws-package-params.js');
-const { AWSResolver } = require('./resolver.js');
-const { AWSStorage } = require('./aws-storage');
+} from './utils.js';
+import getAWSSecrets from './aws-package-params';
+import { AWSResolver } from './resolver';
+// import { AWSStorage } from './aws-storage';
 
 /**
  * The (inner) universal adapter for lambda functions with the secrets already retrieved
@@ -79,7 +79,7 @@ async function lambdaAdapter(event, context, secrets = {}) {
         ...secrets,
         ...process.env,
       },
-      storage: AWSStorage,
+      // storage: AWSStorage,
     };
 
     // support for Amazon SQS, remember records passed by trigger
@@ -88,8 +88,8 @@ async function lambdaAdapter(event, context, secrets = {}) {
     }
 
     updateProcessEnv(con);
-    // eslint-disable-next-line import/no-unresolved,global-require
-    const { main } = require('./main.js');
+
+    const { default: { main } } = await import('./main.js');
 
     const response = await main(request, con);
     ensureUTF8Charset(response);
@@ -143,22 +143,22 @@ async function lambdaAdapter(event, context, secrets = {}) {
  * @param {object} ctx AWS Lambda context
  * @returns {*} lambda response
  */
-async function lambda(evt, ctx) {
+export default async function lambda(evt, ctx) {
   try {
     evt.nonHttp = (!evt.requestContext);
 
     const secrets = await getAWSSecrets(ctx.functionName);
     let handler = (event, context) => lambdaAdapter(event, context, secrets);
 
-    if (secrets.EPSAGON_TOKEN) {
-      // check if health check
-      const suffix = evt.pathParameters && evt.pathParameters.path ? `/${evt.pathParameters.path}` : '';
-      if (suffix !== HEALTHCHECK_PATH) {
-        handler = epsagon(handler, {
-          token: secrets.EPSAGON_TOKEN,
-        });
-      }
-    }
+    // if (secrets.EPSAGON_TOKEN) {
+    //   // check if health check
+    //   const suffix = evt.pathParameters && evt.pathParameters.path ? `/${evt.pathParameters.path}` : '';
+    //   if (suffix !== HEALTHCHECK_PATH) {
+    //     handler = epsagon(handler, {
+    //       token: secrets.EPSAGON_TOKEN,
+    //     });
+    //   }
+    // }
     if (evt.nonHttp) {
       // mimic minimal requirements for our environment setup in lambdaAdapter
       const searchParams = new URLSearchParams();
@@ -192,5 +192,3 @@ async function lambda(evt, ctx) {
 }
 
 lambda.raw = lambdaAdapter;
-
-module.exports = lambda;

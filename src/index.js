@@ -11,9 +11,9 @@
  */
 
 const { Request, Response } = require('@adobe/helix-fetch');
-const aws = require('./aws-adapter.js');
-const openwhisk = require('./openwhisk-adapter.js');
-const azure = require('./azure-adapter.js');
+const aws = require('./aws-adapter.mjs');
+const openwhisk = require('./openwhisk-adapter.mjs');
+const azure = require('./azure-adapter.mjs');
 const google = require('./google-adapter.js');
 
 module.exports = {

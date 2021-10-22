@@ -11,14 +11,14 @@
  */
 
 /* eslint-disable max-classes-per-file,no-underscore-dangle */
-const querystring = require('querystring');
-const path = require('path').posix;
+import querystring from 'querystring';
+import { posix as path } from 'path';
 
 /**
  * Helper class for resolving action names to invocation URLs. It supports the version lock feature,
  * i.e. uses the information in the `x-ow-version-lock` header to lock the version of an action.
  */
-class Resolver {
+export class Resolver {
   /**
    * The name of the version lock header.
    * @returns {string} 'x-ow-version-lock'
@@ -83,7 +83,7 @@ class Resolver {
   }
 }
 
-class OpenwhiskResolver extends Resolver {
+export class OpenwhiskResolver extends Resolver {
   /**
    * Initializes the openwhisk resolver
    * @param {object} params The openwhisk action params.
@@ -102,7 +102,7 @@ class OpenwhiskResolver extends Resolver {
   }
 }
 
-class AWSResolver extends Resolver {
+export class AWSResolver extends Resolver {
   /**
    * Initializes the AWS resolver
    * @param {object} event The lambda event
@@ -119,7 +119,7 @@ class AWSResolver extends Resolver {
   }
 }
 
-class AzureResolver extends Resolver {
+export class AzureResolver extends Resolver {
   /**
    * Initializes the Azure resolver
    * @param {object} context Azure context
@@ -136,7 +136,7 @@ class AzureResolver extends Resolver {
   }
 }
 
-class GoogleResolver extends Resolver {
+export class GoogleResolver extends Resolver {
   /**
    * Initializes the Google resolver
    * @param {object} req Google request
@@ -162,11 +162,3 @@ class GoogleResolver extends Resolver {
     return new URL(path.join(`https://${this.hostname}`, `${packageName}--${actionName}${version.replace(/^(.)/, '_$1').replace(/\./g, '_')}`));
   }
 }
-
-module.exports = {
-  Resolver,
-  AWSResolver,
-  OpenwhiskResolver,
-  GoogleResolver,
-  AzureResolver,
-};

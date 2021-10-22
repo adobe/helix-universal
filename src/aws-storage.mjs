@@ -9,12 +9,32 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import Storage from './storage-api.mjs';
 
-/* eslint-disable no-unused-vars */
-class Storage {
+import AWS from 'aws-sdk';
+
+export class AWSStorage extends Storage {
   static async presignURL(bucket, path, blobParams = {}, method = 'GET', expires = 60) {
-    return '';
+    // if (!AWS) {
+    //   // eslint-disable-next-line import/no-extraneous-dependencies
+    //   AWS = (await import('aws-sdk')).default;
+    //
+    //   AWS.config.update({
+    //     region: process.env.AWS_REGION || 'us-east-1',
+    //     logger: console,
+    //   });
+    // }
+
+    const s3 = new AWS.S3();
+
+    const operation = method === 'PUT' ? 'putObject' : 'getObject';
+    const params = {
+      Bucket: bucket,
+      Key: path.startsWith('/') ? path.substring(1) : path,
+      Expires: expires,
+      ...blobParams,
+    };
+
+    return s3.getSignedUrl(operation, params);
   }
 }
-
-module.exports = Storage;

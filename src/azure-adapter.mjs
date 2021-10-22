@@ -10,12 +10,12 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
-const fs = require('fs').promises;
-const { Request } = require('@adobe/helix-fetch');
-const {
+import fs from 'fs/promises'
+import { Request } from '@adobe/helix-fetch';
+import {
   isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, cleanupHeaderValue,
-} = require('./utils.js');
-const { AzureResolver } = require('./resolver.js');
+} from './utils'
+import { AzureResolver } from './resolver';
 
 let params;
 
@@ -25,7 +25,7 @@ let params;
  * @param {object} req Azure function request
  * @returns {*} azure response
  */
-async function azure(context, req) {
+export default async function azure(context, req) {
   context.log('JavaScript HTTP trigger function processed a request.');
 
   /* istanbul ignore next */
@@ -127,5 +127,3 @@ async function azure(context, req) {
     };
   }
 }
-
-module.exports = azure;

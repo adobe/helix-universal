@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const { promisify } = require('util');
+import { promisify } from 'util';
 
 const CACHE_EXPIRATION = 60 * 60 * 1000; // 1 hour
 
@@ -21,7 +21,7 @@ const cache = {
 async function loadAWSSecrets(functionName) {
   // delay the import so that other runtimes do not have to care
   // eslint-disable-next-line import/no-extraneous-dependencies
-  const AWS = (await import('aws-sdk')).default;
+  const AWS = (await import('aws-sdk/lib/aws')).default;
 
   AWS.config.update({
     region: process.env.AWS_REGION,
@@ -64,4 +64,4 @@ async function getAWSSecrets(functionName) {
   return cache.data;
 }
 
-module.exports = getAWSSecrets;
+export default getAWSSecrets;

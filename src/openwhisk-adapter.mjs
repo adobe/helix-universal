@@ -10,15 +10,15 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
-const querystring = require('querystring');
-const { Request } = require('@adobe/helix-fetch');
-const { epsagon } = require('@adobe/helix-epsagon');
-const {
+import querystring from 'querystring';
+import { Request } from '@adobe/helix-fetch';
+// const { epsagon } = require('@adobe/helix-epsagon');
+import {
   isBinary, isBinaryType, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, HEALTHCHECK_PATH,
   cleanupHeaderValue,
-} = require('./utils.js');
+} from './utils';
 
-const { OpenwhiskResolver } = require('./resolver.js');
+import { OpenwhiskResolver } from './resolver';
 
 /**
  * The universal adapter for openwhisk actions.
@@ -146,13 +146,11 @@ async function openwhiskAdapter(params) {
   }
 }
 
-function openwhisk(params) {
+export default function openwhisk(params) {
   let handler = (p) => openwhiskAdapter(p);
   // enable epsagon if not healthcheck path.
-  if (params.__ow_path !== HEALTHCHECK_PATH) {
-    handler = epsagon(handler);
-  }
+  // if (params.__ow_path !== HEALTHCHECK_PATH) {
+  //   handler = epsagon(handler);
+  // }
   return handler(params);
 }
-
-module.exports = openwhisk;

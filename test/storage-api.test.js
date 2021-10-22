@@ -12,9 +12,9 @@
 /* eslint-env mocha */
 const assert = require('assert');
 const path = require('path');
-const AWSStorage = require('../src/aws-storage');
+const AWSStorage = require('../src/aws-storage.mjs');
 const GoogleStorage = require('../src/google-storage');
-const Storage = require('../src/storage-api');
+const Storage = require('../src/storage-api.mjs');
 
 describe('AWS Storage API Unit Tests', () => {
   beforeEach(() => {
