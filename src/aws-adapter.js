@@ -48,7 +48,7 @@ async function lambdaAdapter(event, context, secrets = {}) {
       region,
       accountId, /* 'function' */,
       functionName,
-      functionAlias,
+      functionAlias = '$LATEST',
     ] = context.invokedFunctionArn.split(':');
     const [packageName, name] = functionName.split('--');
 
