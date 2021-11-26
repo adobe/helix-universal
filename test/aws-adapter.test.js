@@ -91,6 +91,29 @@ describe('Adapter tests for AWS', () => {
     assert.equal(res.statusCode, 200);
   });
 
+  it('when run with no version in functionArn use $LATEST', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: (request, context) => {
+          assert.deepEqual(context.func, {
+            name: 'dump',
+            package: 'helix-pages',
+            version: '$LATEST',
+            fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump',
+            app: 'kvvyh7ikcb',
+          });
+          return new Response('ok');
+        },
+      },
+      './aws-package-params.js': () => ({}),
+    });
+    const res = await lambda(DEFAULT_EVENT, {
+      ...DEFAULT_CONTEXT,
+      invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump',
+    });
+    assert.equal(res.statusCode, 200);
+  });
+
   it('provides package params, local env wins', async () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
