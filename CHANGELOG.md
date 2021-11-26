@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/adobe/helix-universal/compare/v1.9.0...v1.9.1) (2021-11-26)
+
+
+### Bug Fixes
+
+* use $LATEST as default ([#92](https://github.com/adobe/helix-universal/issues/92)) ([3e43cb6](https://github.com/adobe/helix-universal/commit/3e43cb62e83248fa6377331f2ed1d7433f86bd5b))
+
 # [1.9.0](https://github.com/adobe/helix-universal/compare/v1.8.1...v1.9.0) (2021-10-19)
 
 
