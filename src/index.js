@@ -10,15 +10,12 @@
  * governing permissions and limitations under the License.
  */
 
-const { Request, Response } = require('@adobe/helix-fetch');
 const aws = require('./aws-adapter.js');
 const openwhisk = require('./openwhisk-adapter.js');
 const azure = require('./azure-adapter.js');
 const google = require('./google-adapter.js');
 
 module.exports = {
-  Request,
-  Response,
   adapter: {
     openwhisk,
     aws,

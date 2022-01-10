@@ -9,7 +9,6 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-export { Request, Response } from '@adobe/helix-fetch';
 export { Resolver } from './resolver';
 export * from './adapter';
 
@@ -17,7 +16,7 @@ import {UniversalContext as _UniversalContext} from './adapter';
 
 /**
  * Namespace declaration with interfaces that wrappers can extend.
- * 
+ *
  * @example
  * ```ts
  * // Extend in a wrapper declaration via merging
@@ -29,16 +28,16 @@ import {UniversalContext as _UniversalContext} from './adapter';
  *   }
  * }
  * ```
- * 
+ *
  * @example
  * ```ts
  * // Use merged interface as a type
  * import type { Helix } from '@adobe/helix-universal';
- * 
+ *
  * async function main(request: Request, context: Helix.UniversalContext) {
  *   const bar = context.foo();
  * }
- * 
+ *
  * ```
  */
 declare module '@adobe/helix-universal' {
