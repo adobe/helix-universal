@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/adobe/helix-universal/compare/v1.9.1...v2.0.0) (2022-01-10)
+
+
+### Features
+
+* remove exports of request and response ([#101](https://github.com/adobe/helix-universal/issues/101)) ([e6c69ff](https://github.com/adobe/helix-universal/commit/e6c69ffd1efd2f54de00c45355b6a32dd59d6753))
+
+
+### BREAKING CHANGES
+
+* Request/Response are not longer exported. use the ones from helix-fetch
+
 ## [1.9.1](https://github.com/adobe/helix-universal/compare/v1.9.0...v1.9.1) (2021-11-26)
 
 
