@@ -5,6 +5,13 @@
 
 * **deps:** update external fixes ([#103](https://github.com/adobe/helix-universal/issues/103)) ([279cb37](https://github.com/adobe/helix-universal/commit/279cb37af2ae1fce24ebce5df22c88072f1212c8))
 
+## [2.0.1](https://github.com/adobe/helix-universal/compare/v2.0.0...v2.0.1) (2022-01-24)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#103](https://github.com/adobe/helix-universal/issues/103)) ([279cb37](https://github.com/adobe/helix-universal/commit/279cb37af2ae1fce24ebce5df22c88072f1212c8))
+
 # [2.0.0](https://github.com/adobe/helix-universal/compare/v1.9.1...v2.0.0) (2022-01-10)
 
 
