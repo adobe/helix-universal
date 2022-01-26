@@ -79,7 +79,7 @@ describe('Secrets tests for AWS', () => {
     });
 
     // should return cached params
-    plugin = awsSecretsPlugin(() => ({}), { expiration: 1 });
+    plugin = awsSecretsPlugin(() => ({}), { expiration: 1000 });
     process.env = { ...processEnvCopy };
     await plugin({}, { functionName: 'helix3--admin' });
     body = { ...process.env };

@@ -11,7 +11,7 @@
  */
 const { promisify } = require('util');
 
-const CACHE_EXPIRATION = 60 * 60; // 1 hour
+const CACHE_EXPIRATION = 60 * 60 * 1000; // 1 hour
 
 const cache = {
   date: 0,
@@ -68,12 +68,12 @@ async function getAWSSecrets(functionName, expiration) {
  * @param {object} [opts] optional options
  * @param {object} [opts.emulateEnv] ignores call to secrets manager and uses the provided
  *                                   properties instead (used for testing)
- * @param {object} [opts.expiration] cache expiration time in seconds. defaults to 1 hour.
+ * @param {object} [opts.expiration] cache expiration time in milliseconds. defaults to 1 hour.
  * @returns {function(*, *): Promise<*>}
  */
 function awsSecretsPlugin(fn, opts = {}) {
   return async (evt, context) => {
-    const expiration = (opts.expiration ?? CACHE_EXPIRATION) * 1000;
+    const expiration = opts.expiration ?? CACHE_EXPIRATION;
     const secrets = opts.emulateEnv ?? await getAWSSecrets(context.functionName, expiration);
     // set secrets not present on process.env
     Object.entries(secrets).forEach(([key, value]) => {
