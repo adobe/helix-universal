@@ -11,6 +11,8 @@
  */
 
 const aws = require('./aws-adapter.js');
+const awsSecretsPlugin = require('./aws-secrets.js');
+const googleSecretsPlugin = require('./google-secrets.js');
 const openwhisk = require('./openwhisk-adapter.js');
 const google = require('./google-adapter.js');
 
@@ -20,4 +22,6 @@ module.exports = {
     aws,
     google,
   },
+  awsSecretsPlugin,
+  googleSecretsPlugin,
 };
