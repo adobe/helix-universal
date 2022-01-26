@@ -106,6 +106,7 @@ function Nock() {
       assert.deepStrictEqual(unmatched.map((req) => req.options || req), []);
       nock.emitter.off('no match', noMatchHandler);
     }
+    nock.cleanAll();
   };
   return nocker;
 }

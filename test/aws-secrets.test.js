@@ -125,10 +125,10 @@ describe('Secrets tests for AWS', () => {
   it('handles 429 from secret manager', async () => {
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
-      .times(4)
       .reply(429, '', {
         'x-amzn-errortype': 'ThrottlingException',
-      });
+      })
+      .persist();
     const plugin = awsSecretsPlugin(() => ({}), { expiration: 0 });
     try {
       await plugin({}, { functionName: 'helix3--admin' });
