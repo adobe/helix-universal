@@ -12,7 +12,6 @@
 
 const aws = require('./aws-adapter.js');
 const openwhisk = require('./openwhisk-adapter.js');
-const azure = require('./azure-adapter.js');
 const google = require('./google-adapter.js');
 
 module.exports = {
@@ -20,6 +19,5 @@ module.exports = {
     openwhisk,
     aws,
     google,
-    azure,
   },
 };

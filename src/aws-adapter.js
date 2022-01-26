@@ -11,23 +11,20 @@
  */
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
 const { Request } = require('@adobe/helix-fetch');
-const { epsagon } = require('@adobe/helix-epsagon');
 const {
-  isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, HEALTHCHECK_PATH,
-  cleanupHeaderValue,
+  isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, cleanupHeaderValue,
 } = require('./utils.js');
-const getAWSSecrets = require('./aws-package-params.js');
+const awsSecretsPlugin = require('./aws-secrets.js');
 const { AWSResolver } = require('./resolver.js');
 const { AWSStorage } = require('./aws-storage');
 
 /**
- * The (inner) universal adapter for lambda functions with the secrets already retrieved
+ * The raw universal adapter for lambda functions
  * @param {object} event AWS Lambda event
  * @param {object} context AWS Lambda context
- * @param {object} secrets AWS secrets
  * @returns {*} lambda response
  */
-async function lambdaAdapter(event, context, secrets = {}) {
+async function lambdaAdapter(event, context) {
   try {
     // add cookie header if missing
     const { headers } = event;
@@ -55,7 +52,7 @@ async function lambdaAdapter(event, context, secrets = {}) {
     const con = {
       resolver: new AWSResolver(event),
       pathInfo: {
-        suffix: event.pathParameters && event.pathParameters.path ? `/${event.pathParameters.path}` : '',
+        suffix: event.pathParameters?.path ? `/${event.pathParameters.path}` : '',
       },
       runtime: {
         name: 'aws-lambda',
@@ -76,7 +73,6 @@ async function lambdaAdapter(event, context, secrets = {}) {
         requestId: event.requestContext.requestId,
       },
       env: {
-        ...secrets,
         ...process.env,
       },
       storage: AWSStorage,
@@ -137,60 +133,56 @@ async function lambdaAdapter(event, context, secrets = {}) {
   }
 }
 
-/**
- * The universal adapter for lambda functions
- * @param {object} evt AWS Lambda event
- * @param {object} ctx AWS Lambda context
- * @returns {*} lambda response
- */
-async function lambda(evt, ctx) {
-  try {
-    evt.nonHttp = (!evt.requestContext);
-
-    const secrets = await getAWSSecrets(ctx.functionName);
-    let handler = (event, context) => lambdaAdapter(event, context, secrets);
-
-    if (secrets.EPSAGON_TOKEN) {
-      // check if health check
-      const suffix = evt.pathParameters && evt.pathParameters.path ? `/${evt.pathParameters.path}` : '';
-      if (suffix !== HEALTHCHECK_PATH) {
-        handler = epsagon(handler, {
-          token: secrets.EPSAGON_TOKEN,
+function wrap(adapter) {
+  const wrapped = async (evt, ctx) => {
+    try {
+      evt.nonHttp = (!evt.requestContext);
+      if (evt.nonHttp) {
+        // mimic minimal requirements for our environment setup in lambdaAdapter
+        const searchParams = new URLSearchParams();
+        Object.getOwnPropertyNames(evt).forEach((name) => {
+          const value = evt[name];
+          if (typeof value === 'string') {
+            searchParams.append(name, value);
+          }
         });
+        evt.rawPath = '';
+        evt.rawQueryString = searchParams.toString();
+        evt.headers = {};
+        evt.requestContext = { http: {} };
       }
+      // intentional await to catch errors
+      return await adapter(evt, ctx);
+    } catch (e) {
+      if (evt.nonHttp) {
+        // let caller see the exception thrown
+        throw e;
+      }
+      return {
+        statusCode: e.statusCode || 500,
+        headers: {
+          'content-type': 'text/plain',
+          'x-error': cleanupHeaderValue(e.message),
+          'x-invocation-id': ctx.awsRequestId,
+        },
+        body: e.message,
+      };
     }
-    if (evt.nonHttp) {
-      // mimic minimal requirements for our environment setup in lambdaAdapter
-      const searchParams = new URLSearchParams();
-      Object.getOwnPropertyNames(evt).forEach((name) => {
-        const value = evt[name];
-        if (typeof value === 'string') {
-          searchParams.append(name, value);
-        }
-      });
-      evt.rawPath = '';
-      evt.rawQueryString = searchParams.toString();
-      evt.headers = {};
-      evt.requestContext = { http: {} };
-    }
-    return handler(evt, ctx);
-  } catch (e) {
-    if (evt.nonHttp) {
-      // let caller see the exception thrown
-      throw e;
-    }
-    return {
-      statusCode: e.statusCode || 500,
-      headers: {
-        'content-type': 'text/plain',
-        'x-error': cleanupHeaderValue(e.message),
-        'x-invocation-id': ctx.awsRequestId,
-      },
-      body: e.message,
-    };
-  }
+  };
+
+  // allow to install a plugin
+  wrapped.with = (plugin, options) => {
+    const wrappedAdapter = plugin(adapter, options);
+    return wrap(wrappedAdapter);
+  };
+
+  return wrapped;
 }
 
+// default export contains the aws secrets plugin
+const lambda = wrap(lambdaAdapter).with(awsSecretsPlugin);
+// export 'wrap' so it can be used like: `lambda.wrap(lambda.raw).with(epsagon).with(secrets);
+lambda.wrap = wrap;
 lambda.raw = lambdaAdapter;
 
 module.exports = lambda;

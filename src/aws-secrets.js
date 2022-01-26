@@ -11,10 +11,10 @@
  */
 const { promisify } = require('util');
 
-const CACHE_EXPIRATION = 60 * 60 * 1000; // 1 hour
+const CACHE_EXPIRATION = 60 * 60; // 1 hour
 
 const cache = {
-  expiration: 0,
+  date: 0,
   data: null,
 };
 
@@ -49,19 +49,40 @@ async function loadAWSSecrets(functionName) {
   }
 }
 
-async function getAWSSecrets(functionName) {
+async function getAWSSecrets(functionName, expiration) {
   const now = Date.now();
-  if (!cache.data || now > cache.expiration) {
+  if (!cache.data || now > cache.date + expiration) {
     const params = await loadAWSSecrets(functionName);
     const nower = Date.now();
     // eslint-disable-next-line no-console
     console.info(`loaded ${Object.entries(params).length} package parameter in ${nower - now}ms`);
-    if (params) {
-      cache.data = params;
-      cache.expiration = nower + CACHE_EXPIRATION;
-    }
+    cache.data = params;
+    cache.date = nower;
   }
   return cache.data;
 }
 
-module.exports = getAWSSecrets;
+/**
+ * Creates an aws adapter plugin that retrieves secrets from the secrets manager.
+ * @param {function} fn the lambda handler to invoke
+ * @param {object} [opts] optional options
+ * @param {object} [opts.emulateEnv] ignores call to secrets manager and uses the provided
+ *                                   properties instead (used for testing)
+ * @param {object} [opts.expiration] cache expiration time in seconds. defaults to 1 hour.
+ * @returns {function(*, *): Promise<*>}
+ */
+function awsSecretsPlugin(fn, opts = {}) {
+  return async (evt, context) => {
+    const expiration = (opts.expiration ?? CACHE_EXPIRATION) * 1000;
+    const secrets = opts.emulateEnv ?? await getAWSSecrets(context.functionName, expiration);
+    // set secrets not present on process.env
+    Object.entries(secrets).forEach(([key, value]) => {
+      if (!(key in process.env)) {
+        process.env[key] = value;
+      }
+    });
+    return fn(evt, context);
+  };
+}
+
+module.exports = awsSecretsPlugin;

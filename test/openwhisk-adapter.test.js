@@ -13,17 +13,25 @@
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
 const assert = require('assert');
+const proxyquire = require('proxyquire').noCallThru();
 const { Response } = require('@adobe/helix-fetch');
-const proxyquire = require('proxyquire');
+const { createTestPlugin } = require('./utils.js');
 
 describe('OpenWhisk Adapter Test', () => {
+  let processEnvCopy;
+
   beforeEach(() => {
+    processEnvCopy = { ...process.env };
     process.env.__OW_NAMESPACE = 'helix-pages';
     process.env.__OW_ACTION_NAME = '/helix/simple-package/simple-name@4.2.1';
     process.env.__OW_ACTIVATION_ID = '1234';
     process.env.__OW_API_HOST = 'https://test.com';
     process.env.__OW_DEADLINE = '1984';
     process.env.__OW_TRANSACTION_ID = 'ow-tx-id';
+  });
+
+  afterEach(() => {
+    process.env = processEnvCopy;
   });
 
   it('set correct context and environment', async () => {
@@ -40,7 +48,7 @@ describe('OpenWhisk Adapter Test', () => {
           });
           return new Response(ret);
         },
-        '@noCallThru': true,
+
       },
     });
 
@@ -78,12 +86,12 @@ describe('OpenWhisk Adapter Test', () => {
     const main = proxyquire('../src/openwhisk-adapter.js', {
       './main.js': {
         main: () => new Response(),
-        '@noCallThru': true,
+
       },
     });
 
     const resp = await main({});
-    assert.deepEqual(resp, {
+    assert.deepStrictEqual(resp, {
       body: '',
       headers: {
         'content-type': 'text/plain; charset=utf-8',
@@ -102,7 +110,7 @@ describe('OpenWhisk Adapter Test', () => {
           });
           return new Response(ret);
         },
-        '@noCallThru': true,
+
       },
     });
 
@@ -110,7 +118,7 @@ describe('OpenWhisk Adapter Test', () => {
       __ow_query: 'foo=bar&zoo=42',
     });
     resp.body = JSON.parse(resp.body);
-    assert.deepEqual(resp, {
+    assert.deepStrictEqual(resp, {
       body: {
         url: 'https://test.com/api/v1/web/helix/simple-package/simple-name@4.2.1?foo=bar&zoo=42',
       },
@@ -132,7 +140,7 @@ describe('OpenWhisk Adapter Test', () => {
           });
           return new Response(ret);
         },
-        '@noCallThru': true,
+
       },
     });
 
@@ -142,7 +150,7 @@ describe('OpenWhisk Adapter Test', () => {
       SECRET_TOKEN: 'xyz',
     });
     resp.body = JSON.parse(resp.body);
-    assert.deepEqual(resp, {
+    assert.deepStrictEqual(resp, {
       body: {
         url: 'https://test.com/api/v1/web/helix/simple-package/simple-name@4.2.1?foo=bar&zoo=42&test=dummy',
         secret: 'xyz',
@@ -167,7 +175,7 @@ describe('OpenWhisk Adapter Test', () => {
           });
           return new Response(ret);
         },
-        '@noCallThru': true,
+
       },
     });
 
@@ -182,7 +190,7 @@ describe('OpenWhisk Adapter Test', () => {
       SECRET_TOKEN: 'xyz',
     });
     resp.body = JSON.parse(resp.body);
-    assert.deepEqual(resp, {
+    assert.deepStrictEqual(resp, {
       body: {
         headers: {
           'x-test-header': '42',
@@ -209,7 +217,7 @@ describe('OpenWhisk Adapter Test', () => {
           });
           return new Response(ret);
         },
-        '@noCallThru': true,
+
       },
     });
 
@@ -222,7 +230,7 @@ describe('OpenWhisk Adapter Test', () => {
       },
     });
     resp.body = JSON.parse(resp.body);
-    assert.deepEqual(resp, {
+    assert.deepStrictEqual(resp, {
       body: {
         body: 'hello, world.',
       },
@@ -244,7 +252,7 @@ describe('OpenWhisk Adapter Test', () => {
           });
           return new Response(ret);
         },
-        '@noCallThru': true,
+
       },
     });
 
@@ -257,7 +265,7 @@ describe('OpenWhisk Adapter Test', () => {
       },
     });
     resp.body = JSON.parse(resp.body);
-    assert.deepEqual(resp, {
+    assert.deepStrictEqual(resp, {
       body: {
         body: 'hello, world.',
       },
@@ -280,13 +288,13 @@ describe('OpenWhisk Adapter Test', () => {
           });
           return new Response(ret);
         },
-        '@noCallThru': true,
+
       },
     });
 
     const resp = await main({});
     resp.body = JSON.parse(resp.body);
-    assert.deepEqual(resp, {
+    assert.deepStrictEqual(resp, {
       body: {
         url: 'https://localhost/api/v1/web/helix/simple-package/simple-name@4.2.1',
       },
@@ -307,7 +315,7 @@ describe('OpenWhisk Adapter Test', () => {
           });
           return new Response(ret);
         },
-        '@noCallThru': true,
+
       },
     });
 
@@ -317,7 +325,7 @@ describe('OpenWhisk Adapter Test', () => {
       },
     });
     resp.body = JSON.parse(resp.body);
-    assert.deepEqual(resp, {
+    assert.deepStrictEqual(resp, {
       body: {
         url: 'https://adobeioruntime.net/api/v1/web/helix/simple-package/simple-name@4.2.1',
       },
@@ -335,7 +343,7 @@ describe('OpenWhisk Adapter Test', () => {
         main: () => {
           throw Error('boing!');
         },
-        '@noCallThru': true,
+
       },
     });
 
@@ -344,7 +352,7 @@ describe('OpenWhisk Adapter Test', () => {
         'x-forwarded-host': 'adobeioruntime.net,test.com',
       },
     });
-    assert.deepEqual(resp, {
+    assert.deepStrictEqual(resp, {
       body: 'Internal Server Error',
       headers: {
         'Content-Type': 'text/plain',
@@ -360,10 +368,10 @@ describe('OpenWhisk Adapter Test', () => {
       './main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
-          assert.equal(await request.text(), 'hallo text');
+          assert.strictEqual(await request.text(), 'hallo text');
           return new Response('okay');
         },
-        '@noCallThru': true,
+
       },
     });
 
@@ -376,7 +384,7 @@ describe('OpenWhisk Adapter Test', () => {
     };
 
     const result = await main(params);
-    assert.equal(result.statusCode, 200);
+    assert.strictEqual(result.statusCode, 200);
   });
 
   it('json request body is decoded', async () => {
@@ -384,10 +392,10 @@ describe('OpenWhisk Adapter Test', () => {
       './main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
-          assert.deepEqual(await request.json(), { goo: 'haha' });
+          assert.deepStrictEqual(await request.json(), { goo: 'haha' });
           return new Response('okay');
         },
-        '@noCallThru': true,
+
       },
     });
 
@@ -400,14 +408,14 @@ describe('OpenWhisk Adapter Test', () => {
     };
 
     const result = await main(params);
-    assert.equal(result.statusCode, 200);
+    assert.strictEqual(result.statusCode, 200);
   });
 
   it('handles illegal request headers with 400', async () => {
     const main = proxyquire('../src/openwhisk-adapter.js', {
       './main.js': {
         main: () => new Response('ok'),
-        '@noCallThru': true,
+
       },
     });
     const params = {
@@ -417,7 +425,7 @@ describe('OpenWhisk Adapter Test', () => {
       },
     };
     const result = await main(params);
-    assert.equal(result.statusCode, 400);
+    assert.strictEqual(result.statusCode, 400);
   });
 
   it('handle binary response body', async () => {
@@ -429,7 +437,7 @@ describe('OpenWhisk Adapter Test', () => {
             'content-type': 'application/octet-stream',
           },
         }),
-        '@noCallThru': true,
+
       },
     });
     const params = {
@@ -438,5 +446,33 @@ describe('OpenWhisk Adapter Test', () => {
     const res = await main(params);
     assert.strictEqual(res.statusCode, 200);
     assert.strictEqual(Buffer.from(res.body, 'base64').toString('utf-8'), 'okay');
+  });
+
+  it('default can wrap more plugins', async () => {
+    const invocations = [];
+    const main = proxyquire('../src/openwhisk-adapter.js', {
+      './main.js': {
+        main: () => {
+          invocations.push('main');
+          return new Response('ok');
+        },
+      },
+    });
+    const handler = main
+      .with(createTestPlugin('plugin0', invocations))
+      .with(createTestPlugin('plugin1', invocations));
+
+    const params = {
+      __ow_method: 'get',
+    };
+    const res = await handler(params);
+    assert.strictEqual(res.statusCode, 200);
+    assert.deepStrictEqual(invocations, [
+      'plugin1 before',
+      'plugin0 before',
+      'main',
+      'plugin0 after',
+      'plugin1 after',
+    ]);
   });
 });
