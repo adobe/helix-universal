@@ -9,10 +9,12 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const assert = require('assert');
 const crypto = require('crypto');
 const path = require('path');
 const fse = require('fs-extra');
 const util = require('util');
+const nock = require('nock');
 
 async function createTestRoot() {
   const dir = path.resolve(__dirname, 'tmp', crypto.randomBytes(16)
@@ -20,7 +22,6 @@ async function createTestRoot() {
   await fse.ensureDir(dir);
   return dir;
 }
-exports.createTestRoot = createTestRoot;
 
 const ANSI_REGEXP = RegExp([
   '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\\u0007)',
@@ -59,4 +60,61 @@ class TestLogger {
   }
 }
 
-exports.TestLogger = TestLogger;
+function proxySecretsPlugin(plugin, emulateEnv = {}) {
+  return function testSecretsPlugin(fn) {
+    const handler = plugin(fn, { emulateEnv });
+    return async (...args) => handler(...args);
+  };
+}
+
+function createTestPlugin(name, invocations) {
+  return function testPlugin(fn) {
+    return async (...args) => {
+      invocations.push(`${name} before`);
+      const ret = await fn(...args);
+      invocations.push(`${name} after`);
+      return ret;
+    };
+  };
+}
+
+function Nock() {
+  const scopes = {};
+
+  let unmatched;
+
+  function noMatchHandler(req) {
+    unmatched.push(req);
+  }
+
+  function nocker(url) {
+    let scope = scopes[url];
+    if (!scope) {
+      scope = nock(url);
+      scopes[url] = scope;
+    }
+    if (!unmatched) {
+      unmatched = [];
+      nock.emitter.on('no match', noMatchHandler);
+    }
+    return scope;
+  }
+
+  nocker.done = () => {
+    Object.values(scopes).forEach((s) => s.done());
+    if (unmatched) {
+      assert.deepStrictEqual(unmatched.map((req) => req.options || req), []);
+      nock.emitter.off('no match', noMatchHandler);
+    }
+    nock.cleanAll();
+  };
+  return nocker;
+}
+
+module.exports = {
+  TestLogger,
+  proxySecretsPlugin,
+  createTestPlugin,
+  createTestRoot,
+  Nock,
+};

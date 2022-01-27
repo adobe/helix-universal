@@ -13,6 +13,8 @@
 const { Request, Response } = require('@adobe/helix-fetch');
 const assert = require('assert');
 const proxyquire = require('proxyquire').noCallThru();
+const { createTestPlugin, proxySecretsPlugin } = require('./utils.js');
+const awsSecretsPlugin = require('../src/aws-secrets.js');
 
 const DEFAULT_EVENT = {
   version: '2.0',
@@ -63,19 +65,21 @@ const DEFAULT_CONTEXT = {
 };
 
 describe('Adapter tests for AWS', () => {
+  let processEnvCopy;
+
   beforeEach(() => {
-    process.env.AWS_TEST_PARAM = '123';
+    processEnvCopy = { ...process.env };
   });
 
   afterEach(() => {
-    delete process.env.AWS_TEST_PARAM;
+    process.env = processEnvCopy;
   });
 
-  it('context.func', async () => {
+  it('runs the function', async () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
         main: (request, context) => {
-          assert.deepEqual(context.func, {
+          assert.deepStrictEqual(context.func, {
             name: 'dump',
             package: 'helix-pages',
             version: '4.3.1',
@@ -85,17 +89,90 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
+  });
+
+  it('can invoke the raw handler', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: (request, context) => {
+          assert.deepStrictEqual(context.func, {
+            name: 'dump',
+            package: 'helix-pages',
+            version: '4.3.1',
+            fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
+            app: 'kvvyh7ikcb',
+          });
+          return new Response('ok');
+        },
+      },
+    });
+    const res = await lambda.raw(DEFAULT_EVENT, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
+  });
+
+  it('default can wrap more plugins', async () => {
+    const invocations = [];
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: () => {
+          invocations.push('main');
+          return new Response('ok');
+        },
+      },
+      './aws-secrets.js': createTestPlugin('secrets', invocations),
+    });
+    const handler = lambda
+      .with(createTestPlugin('plugin0', invocations))
+      .with(createTestPlugin('plugin1', invocations));
+
+    const res = await handler(DEFAULT_EVENT, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
+    assert.deepStrictEqual(invocations, [
+      'plugin1 before',
+      'plugin0 before',
+      'secrets before',
+      'main',
+      'secrets after',
+      'plugin0 after',
+      'plugin1 after',
+    ]);
+  });
+
+  it('default can wrap raw adapter plugins', async () => {
+    const invocations = [];
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: () => {
+          invocations.push('main');
+          return new Response('ok');
+        },
+      },
+    });
+    const handler = lambda
+      .wrap(lambda.raw)
+      .with(createTestPlugin('plugin0', invocations))
+      .with(createTestPlugin('plugin1', invocations));
+
+    const res = await handler(DEFAULT_EVENT, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
+    assert.deepStrictEqual(invocations, [
+      'plugin1 before',
+      'plugin0 before',
+      'main',
+      'plugin0 after',
+      'plugin1 after',
+    ]);
   });
 
   it('when run with no version in functionArn use $LATEST', async () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
         main: (request, context) => {
-          assert.deepEqual(context.func, {
+          assert.deepStrictEqual(context.func, {
             name: 'dump',
             package: 'helix-pages',
             version: '$LATEST',
@@ -105,13 +182,13 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(DEFAULT_EVENT, {
       ...DEFAULT_CONTEXT,
       invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump',
     });
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
   });
 
   it('provides package params, local env wins', async () => {
@@ -119,18 +196,17 @@ describe('Adapter tests for AWS', () => {
       './main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
-      './aws-package-params.js': () => ({
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin, {
         SOME_SECRET: 'pssst',
         AWS_TEST_PARAM: 'abc',
       }),
     });
+    process.env.AWS_TEST_PARAM = '123';
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
     const body = JSON.parse(res.body);
-    Object.keys(process.env)
-      .filter((key) => key !== 'AWS_TEST_PARAM')
-      .forEach((key) => delete body[key]);
-    assert.deepEqual(body, {
+    Object.keys(processEnvCopy).forEach((key) => delete body[key]);
+    assert.deepStrictEqual(body, {
       SOME_SECRET: 'pssst',
       AWS_TEST_PARAM: '123',
     });
@@ -141,16 +217,16 @@ describe('Adapter tests for AWS', () => {
       './main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
-      './aws-package-params.js': () => {
-        throw Error('should not be called.');
-      },
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin, {
+        SOME_SECRET: 'pssst',
+        AWS_TEST_PARAM: 'abc',
+      }),
     });
     const res = await lambda.raw(DEFAULT_EVENT, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
     const body = JSON.parse(res.body);
-    Object.keys(process.env).forEach((key) => delete body[key]);
-    assert.deepEqual(body, {
-    });
+    Object.keys(processEnvCopy).forEach((key) => delete body[key]);
+    assert.deepStrictEqual(body, {});
   });
 
   it('context.invocation', async () => {
@@ -158,7 +234,7 @@ describe('Adapter tests for AWS', () => {
       './main.js': {
         main: (request, context) => {
           delete context.invocation.deadline;
-          assert.deepEqual(context.invocation, {
+          assert.deepStrictEqual(context.invocation, {
             id: '535f0399-9c90-4042-880e-620cfec6af55',
             requestId: 'bjKNYhHcoAMEJIw=',
             transactionId: 'Root=1-603df0bb-05e846307a6221f72030fe68',
@@ -166,11 +242,11 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
-    assert.deepEqual(res.headers, {
+    assert.strictEqual(res.statusCode, 200);
+    assert.deepStrictEqual(res.headers, {
       'content-type': 'text/plain; charset=utf-8',
       'x-invocation-id': '535f0399-9c90-4042-880e-620cfec6af55',
     });
@@ -181,7 +257,7 @@ describe('Adapter tests for AWS', () => {
       './main.js': {
         main: (request, context) => {
           delete context.invocation.deadline;
-          assert.deepEqual(context.invocation, {
+          assert.deepStrictEqual(context.invocation, {
             id: '535f0399-9c90-4042-880e-620cfec6af55',
             requestId: 'bjKNYhHcoAMEJIw=',
             transactionId: 'my-tx-id',
@@ -189,7 +265,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda({
       ...DEFAULT_EVENT,
@@ -198,7 +274,7 @@ describe('Adapter tests for AWS', () => {
         'x-transaction-id': 'my-tx-id',
       },
     }, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
   });
 
   it('handles illegal request headers with 400', async () => {
@@ -206,7 +282,7 @@ describe('Adapter tests for AWS', () => {
       './main.js': {
         main: () => new Response('ok'),
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda({
       ...DEFAULT_EVENT,
@@ -215,8 +291,8 @@ describe('Adapter tests for AWS', () => {
         accept: 'жsome value',
       },
     }, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 400);
-    assert.deepEqual(res.headers, {
+    assert.strictEqual(res.statusCode, 400);
+    assert.deepStrictEqual(res.headers, {
       'content-type': 'text/plain',
       'x-invocation-id': '535f0399-9c90-4042-880e-620cfec6af55',
     });
@@ -229,7 +305,7 @@ describe('Adapter tests for AWS', () => {
           throw new Error('function kaput');
         },
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda({
       ...DEFAULT_EVENT,
@@ -237,23 +313,23 @@ describe('Adapter tests for AWS', () => {
         host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
       },
     }, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 500);
-    assert.deepEqual(res.headers, {
+    assert.strictEqual(res.statusCode, 500);
+    assert.deepStrictEqual(res.headers, {
       'content-type': 'text/plain',
       'x-error': 'function kaput',
       'x-invocation-id': '535f0399-9c90-4042-880e-620cfec6af55',
     });
   });
 
-  it('handles error in epsagon wrapper', async () => {
+  it('handles error in plugin ', async () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
         main: () => {
           throw new Error('function kaput');
         },
       },
-      './aws-package-params.js': () => {
-        throw new Error('epsagon wrapper kaput');
+      './aws-secrets.js': () => async () => {
+        throw new Error('plugin kaput');
       },
     });
     const res = await lambda({
@@ -262,10 +338,10 @@ describe('Adapter tests for AWS', () => {
         host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
       },
     }, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 500);
-    assert.deepEqual(res.headers, {
+    assert.strictEqual(res.statusCode, 500);
+    assert.deepStrictEqual(res.headers, {
       'content-type': 'text/plain',
-      'x-error': 'epsagon wrapper kaput',
+      'x-error': 'plugin kaput',
       'x-invocation-id': '535f0399-9c90-4042-880e-620cfec6af55',
     });
   });
@@ -283,11 +359,11 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
-    assert.equal(logFlushed, 1);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(logFlushed, 1);
   });
 
   it('handle binary request body', async () => {
@@ -295,12 +371,11 @@ describe('Adapter tests for AWS', () => {
       './main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
-          assert.deepEqual(await request.json(), { goo: 'haha' });
+          assert.deepStrictEqual(await request.json(), { goo: 'haha' });
           return new Response('okay');
         },
-        '@noCallThru': true,
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda({
@@ -320,7 +395,7 @@ describe('Adapter tests for AWS', () => {
         'content-type': 'application/json',
       },
     }, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
   });
 
   it('handle binary response body', async () => {
@@ -332,15 +407,14 @@ describe('Adapter tests for AWS', () => {
             'content-type': 'application/octet-stream',
           },
         }),
-        '@noCallThru': true,
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
-    assert.equal(res.isBase64Encoded, true);
-    assert.equal(Buffer.from(res.body, 'base64').toString('utf-8'), 'binary');
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.isBase64Encoded, true);
+    assert.strictEqual(Buffer.from(res.body, 'base64').toString('utf-8'), 'binary');
   });
 
   it('handles request params', async () => {
@@ -349,12 +423,12 @@ describe('Adapter tests for AWS', () => {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
           const url = new URL(request.url);
-          assert.equal(url.searchParams.get('foo'), 'bar');
+          assert.strictEqual(url.searchParams.get('foo'), 'bar');
+          assert.strictEqual(context.pathInfo.suffix, '');
           return new Response('okay');
         },
-        '@noCallThru': true,
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda({
@@ -364,7 +438,31 @@ describe('Adapter tests for AWS', () => {
         host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
       },
     }, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
+  });
+
+  it('handles pathInfo', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async (request, context) => {
+          assert.strictEqual(context.pathInfo.suffix, '/status');
+          return new Response('okay');
+        },
+      },
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT,
+      pathParameters: {
+        path: 'status',
+      },
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
   });
 
   it('handles event cookies params', async () => {
@@ -378,9 +476,8 @@ describe('Adapter tests for AWS', () => {
           });
           return new Response('okay');
         },
-        '@noCallThru': true,
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda({
@@ -394,7 +491,7 @@ describe('Adapter tests for AWS', () => {
         host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
       },
     }, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
   });
 
   it('handles preserves cookie header', async () => {
@@ -408,9 +505,8 @@ describe('Adapter tests for AWS', () => {
           });
           return new Response('okay');
         },
-        '@noCallThru': true,
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda({
@@ -423,7 +519,7 @@ describe('Adapter tests for AWS', () => {
         cookie: 'name1=value1;name2=value2',
       },
     }, DEFAULT_CONTEXT);
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
   });
 
   it('can be run without requestContext', async () => {
@@ -442,7 +538,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(
       {
@@ -453,7 +549,7 @@ describe('Adapter tests for AWS', () => {
       },
       DEFAULT_CONTEXT,
     );
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
   });
 
   it('can be run as a trigger with context.records', async () => {
@@ -484,7 +580,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(
       {
@@ -494,7 +590,7 @@ describe('Adapter tests for AWS', () => {
       },
       DEFAULT_CONTEXT,
     );
-    assert.equal(res.statusCode, 200);
+    assert.strictEqual(res.statusCode, 200);
   });
 
   it('handles errors when run without requestContext', async () => {
@@ -504,7 +600,7 @@ describe('Adapter tests for AWS', () => {
           throw new Error('function kaput');
         },
       },
-      './aws-package-params.js': () => ({}),
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     await assert.rejects(async () => lambda(
       {
@@ -517,25 +613,17 @@ describe('Adapter tests for AWS', () => {
     ));
   });
 
-  it('handles errors from lambda setup when run without requestContext', async () => {
+  it('throws errors for non http events', async () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
         main: () => {
           throw new Error('function kaput');
         },
       },
-      './aws-package-params.js': () => {
-        throw new Error('package params kaput');
+      './aws-secrets.js': () => async () => {
+        throw new Error('plugin kaput');
       },
     });
-    await assert.rejects(async () => lambda(
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-        other: {},
-      },
-      DEFAULT_CONTEXT,
-    ));
+    await assert.rejects(lambda({}, DEFAULT_CONTEXT), new Error('plugin kaput'));
   });
 });

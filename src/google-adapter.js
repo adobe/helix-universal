@@ -14,7 +14,7 @@ const { Request } = require('@adobe/helix-fetch');
 const {
   isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, cleanupHeaderValue,
 } = require('./utils.js');
-const getGoogleSecrets = require('./google-package-params.js');
+const googleSecretsPlugin = require('./google-secrets.js');
 
 const { GoogleResolver } = require('./resolver.js');
 const { GoogleStorage } = require('./google-storage.js');
@@ -23,9 +23,8 @@ const { GoogleStorage } = require('./google-storage.js');
  * Universal adapter for google cloud functions.
  * @param {*} req express request
  * @param {*} res express response
- * @param {object} secrets google secrets
  */
-async function googleAdapter(req, res, secrets = {}) {
+async function googleAdapter(req, res) {
   try {
     const request = new Request(`https://${req.hostname}/${process.env.K_SERVICE}${req.originalUrl}`, {
       method: req.method,
@@ -62,7 +61,6 @@ async function googleAdapter(req, res, secrets = {}) {
         requestId: request.headers.get('x-cloud-trace-context'),
       },
       env: {
-        ...secrets,
         ...process.env,
       },
       storage: GoogleStorage,
@@ -100,28 +98,39 @@ async function googleAdapter(req, res, secrets = {}) {
   }
 }
 
-/**
- * Universal adapter for google cloud functions.
- * @param {*} req express request
- * @param {*} res express response
- */
-async function google(req, res) {
-  try {
-    const [subdomain] = req.headers.host.split('.');
-    // eslint-disable-next-line no-unused-vars
-    const [country, region, ...servicename] = subdomain.split('-');
-    const secrets = await getGoogleSecrets(process.env.K_SERVICE, servicename.join('-'));
-    await googleAdapter(req, res, secrets);
-  } catch (e) {
-    res
-      .status(e.statusCode || 500)
-      .set('content-type', 'text/plain')
-      .set('x-invocation-id', req.headers['function-execution-id'])
-      .set('x-error', cleanupHeaderValue(e.message))
-      .send(e.message);
-  }
+function wrap(adapter) {
+  /**
+   * Universal adapter for google cloud functions.
+   * @param {*} req express request
+   * @param {*} res express response
+   */
+  const wrapped = async (req, res) => {
+    try {
+      // intentional await to catch errors
+      await adapter(req, res);
+    } catch (e) {
+      res
+        .status(e.statusCode || 500)
+        .set('content-type', 'text/plain')
+        .set('x-invocation-id', req.headers['function-execution-id'])
+        .set('x-error', cleanupHeaderValue(e.message))
+        .send(e.message);
+    }
+  };
+
+  // allow to install a plugin
+  wrapped.with = (plugin, options) => {
+    const wrappedAdapter = plugin(adapter, options);
+    return wrap(wrappedAdapter);
+  };
+
+  return wrapped;
 }
 
+// default export contains the aws secrets plugin
+const google = wrap(googleAdapter).with(googleSecretsPlugin);
+// export 'wrap' so it can be used like: `google.wrap(google.raw).with(epsagon).with(secrets);
+google.wrap = wrap;
 google.raw = googleAdapter;
 
 module.exports = google;
