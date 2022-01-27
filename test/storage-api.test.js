@@ -17,15 +17,22 @@ const GoogleStorage = require('../src/google-storage');
 const Storage = require('../src/storage-api');
 
 describe('AWS Storage API Unit Tests', () => {
+  let processEnvCopy;
+
   beforeEach(() => {
-    process.env.AWS_ACCESS_KEY_ID = 'FAKE';
-    process.env.AWS_SECRET_ACCESS_KEY = 'Super/FAKE';
+    processEnvCopy = { ...process.env };
+    process.env.AWS_ACCESS_KEY_ID = 'fake';
+    process.env.AWS_SECRET_ACCESS_KEY = 'fake';
+  });
+
+  afterEach(() => {
+    process.env = processEnvCopy;
   });
 
   it('Sign URL for PUT', async () => {
     const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', 'index.md', {}, 'PUT', 120);
     assert.ok(res);
-    assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=FAKE'), `${res} is invalid`);
+    assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=fake'), `${res} is invalid`);
   });
 
   it('Sign URL for PUT with content type', async () => {
@@ -33,14 +40,14 @@ describe('AWS Storage API Unit Tests', () => {
       ContentType: 'application/json',
     }, 'PUT', 120);
     assert.ok(res);
-    assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=FAKE&Content-Type=application%2Fjson'), `${res} is invalid`);
+    assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=fake&Content-Type=application%2Fjson'), `${res} is invalid`);
   });
 
   it('Sign URL for GET', async () => {
     process.env.AWS_REGION = 'us-east-1';
     const res = await AWSStorage.presignURL('helix3-prototype-fallback-public', '/index.md');
     assert.ok(res);
-    assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=FAKE'), `${res} is invalid`);
+    assert.ok(res.startsWith('https://helix3-prototype-fallback-public.s3.amazonaws.com/index.md?AWSAccessKeyId=fake'), `${res} is invalid`);
   });
 });
 

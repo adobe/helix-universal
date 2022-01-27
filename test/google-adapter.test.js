@@ -13,6 +13,8 @@
 const { Response } = require('@adobe/helix-fetch');
 const assert = require('assert');
 const proxyquire = require('proxyquire').noCallThru();
+const { proxySecretsPlugin, createTestPlugin } = require('./utils.js');
+const googleSecretsPlugin = require('../src/google-secrets.js');
 
 function createMockResponse() {
   return {
@@ -44,12 +46,14 @@ function createMockRequest(url, headers) {
 }
 
 describe('Adapter tests for Google', () => {
+  let processEnvCopy;
+
   beforeEach(() => {
-    process.env.GOOGLE_TEST_PARAM = '123';
+    processEnvCopy = { ...process.env };
   });
 
   afterEach(() => {
-    delete process.env.GOOGLE_TEST_PARAM;
+    process.env = processEnvCopy;
   });
 
   it('handles illegal request headers with 400', async () => {
@@ -59,6 +63,8 @@ describe('Adapter tests for Google', () => {
       './main.js': {
         main: () => new Response('ok'),
       },
+      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
+
     });
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
       host: 'us-central1-helix-225321.cloudfunctions.net',
@@ -66,7 +72,7 @@ describe('Adapter tests for Google', () => {
     });
     const res = createMockResponse();
     await google(req, res);
-    assert.equal(res.code, 400);
+    assert.strictEqual(res.code, 400);
   });
 
   it('context.pathInfo.suffix', async () => {
@@ -75,12 +81,12 @@ describe('Adapter tests for Google', () => {
     const google = proxyquire('../src/google-adapter.js', {
       './main.js': {
         main: (request, context) => {
-          assert.equal(context.pathInfo.suffix, '/foo/bar');
+          assert.strictEqual(context.pathInfo.suffix, '/foo/bar');
           assert.ok(request);
           return new Response('okay');
         },
       },
-      './google-package-params.js': () => ({}),
+      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
     });
 
     const req = createMockRequest('/helix-services--content-proxy_4.3.1/foo/bar', {
@@ -89,8 +95,8 @@ describe('Adapter tests for Google', () => {
     });
     const res = createMockResponse();
     await google(req, res);
-    assert.equal(res.code, 200);
-    assert.deepEqual(res.headers, {
+    assert.strictEqual(res.code, 200);
+    assert.deepStrictEqual(res.headers, {
       'content-type': 'text/plain; charset=utf-8',
       'x-invocation-id': '1234',
     });
@@ -99,11 +105,12 @@ describe('Adapter tests for Google', () => {
   it('provides package params, local env wins', async () => {
     process.env.K_SERVICE = 'helix-services--content-proxy';
     process.env.K_REVISION = '4.3.1';
+    process.env.GOOGLE_TEST_PARAM = '123';
     const google = proxyquire('../src/google-adapter.js', {
       './main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
-      './google-package-params.js': () => ({
+      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin, {
         SOME_SECRET: 'pssst',
         GOOGLE_TEST_PARAM: 'abc',
       }),
@@ -115,14 +122,14 @@ describe('Adapter tests for Google', () => {
     });
     const res = createMockResponse();
     await google(req, res);
-    assert.equal(res.code, 200);
+    assert.strictEqual(res.code, 200);
     const body = JSON.parse(res.body);
-    Object.keys(process.env)
-      .filter((key) => key !== 'GOOGLE_TEST_PARAM')
-      .forEach((key) => delete body[key]);
-    assert.deepEqual(body, {
+    Object.keys(processEnvCopy).forEach((key) => delete body[key]);
+    assert.deepStrictEqual(body, {
       SOME_SECRET: 'pssst',
       GOOGLE_TEST_PARAM: '123',
+      K_REVISION: '4.3.1',
+      K_SERVICE: 'helix-services--content-proxy',
     });
   });
 
@@ -133,8 +140,8 @@ describe('Adapter tests for Google', () => {
       './main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
-      './google-package-params.js': () => {
-        throw Error('should not be called');
+      './google-secrets.js': () => async () => {
+        throw new Error('plugin kaput');
       },
     });
 
@@ -144,22 +151,22 @@ describe('Adapter tests for Google', () => {
     });
     const res = createMockResponse();
     await google.raw(req, res);
-    assert.equal(res.code, 200);
+    assert.strictEqual(res.code, 200);
     const body = JSON.parse(res.body);
-    Object.keys(process.env).forEach((key) => delete body[key]);
-    assert.deepEqual(body, {
+    Object.keys(processEnvCopy).forEach((key) => delete body[key]);
+    assert.deepStrictEqual(body, {
+      K_REVISION: '4.3.1',
+      K_SERVICE: 'helix-services--content-proxy',
     });
   });
 
   it('adapter catches error in secrets fetching', async () => {
-    process.env.K_SERVICE = 'helix-services--content-proxy';
-    process.env.K_REVISION = '4.3.1';
     const google = proxyquire('../src/google-adapter.js', {
       './main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
-      './google-package-params.js': () => {
-        throw Error('something went wrong');
+      './google-secrets.js': () => async () => {
+        throw new Error('something went wrong');
       },
     });
 
@@ -169,17 +176,17 @@ describe('Adapter tests for Google', () => {
     });
     const res = createMockResponse();
     await google(req, res);
-    assert.equal(res.code, 500);
-    assert.equal(res.headers['x-error'], 'something went wrong');
+    assert.strictEqual(res.code, 500);
+    assert.strictEqual(res.headers['x-error'], 'something went wrong');
   });
 
-  it('context.func', async () => {
+  it('invokes function', async () => {
     process.env.K_SERVICE = 'simple-package--simple-name';
     process.env.K_REVISION = '1.45.0';
     const google = proxyquire('../src/google-adapter.js', {
       './main.js': {
         main: (request, context) => {
-          assert.deepEqual(context.func, {
+          assert.deepStrictEqual(context.func, {
             name: 'simple-name',
             package: 'simple-package',
             version: '1.45.0',
@@ -189,14 +196,14 @@ describe('Adapter tests for Google', () => {
           return new Response('ok');
         },
       },
-      './google-package-params.js': () => ({}),
+      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
     });
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
       host: 'us-central1-helix-225321.cloudfunctions.net',
     });
     const res = createMockResponse();
     await google(req, res);
-    assert.equal(res.code, 200);
+    assert.strictEqual(res.code, 200);
   });
 
   it('context.invocation', async () => {
@@ -206,7 +213,7 @@ describe('Adapter tests for Google', () => {
       './main.js': {
         main: (request, context) => {
           delete context.invocation.deadline;
-          assert.deepEqual(context.invocation, {
+          assert.deepStrictEqual(context.invocation, {
             id: '1234',
             requestId: 'some-request-id',
             transactionId: 'my-tx-id',
@@ -214,7 +221,7 @@ describe('Adapter tests for Google', () => {
           return new Response('ok');
         },
       },
-      './google-package-params.js': () => ({}),
+      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
     });
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
       host: 'us-central1-helix-225321.cloudfunctions.net',
@@ -224,7 +231,7 @@ describe('Adapter tests for Google', () => {
     });
     const res = createMockResponse();
     await google(req, res);
-    assert.equal(res.code, 200);
+    assert.strictEqual(res.code, 200);
   });
 
   it('handles error in function', async () => {
@@ -236,7 +243,7 @@ describe('Adapter tests for Google', () => {
           throw new Error('function kaput');
         },
       },
-      './google-package-params.js': () => ({}),
+      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
     });
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
       host: 'us-central1-helix-225321.cloudfunctions.net',
@@ -244,8 +251,8 @@ describe('Adapter tests for Google', () => {
     });
     const res = createMockResponse();
     await google(req, res);
-    assert.equal(res.code, 500);
-    assert.deepEqual(res.headers, {
+    assert.strictEqual(res.code, 500);
+    assert.deepStrictEqual(res.headers, {
       'content-type': 'text/plain',
       'x-error': 'function kaput',
       'x-invocation-id': '1234',
@@ -263,9 +270,8 @@ describe('Adapter tests for Google', () => {
             'content-type': 'application/octet-stream',
           },
         }),
-        '@noCallThru': true,
       },
-      './google-package-params.js': () => ({}),
+      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
     });
 
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
@@ -277,5 +283,70 @@ describe('Adapter tests for Google', () => {
     assert.strictEqual(res.code, 200);
     assert.strictEqual(res.body.toString('utf-8'), 'okay');
     assert.ok(Buffer.isBuffer(res.body));
+  });
+
+  it('default can wrap more plugins', async () => {
+    const invocations = [];
+    process.env.K_SERVICE = 'simple-package--simple-name';
+    process.env.K_REVISION = '1.45.0';
+    const google = proxyquire('../src/google-adapter.js', {
+      './main.js': {
+        main: () => {
+          invocations.push('main');
+          return new Response('ok');
+        },
+      },
+      './google-secrets.js': createTestPlugin('secrets', invocations),
+    });
+    const handler = google
+      .with(createTestPlugin('plugin0', invocations))
+      .with(createTestPlugin('plugin1', invocations));
+
+    const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
+      host: 'us-central1-helix-225321.cloudfunctions.net',
+    });
+    const res = createMockResponse();
+    await handler(req, res);
+    assert.strictEqual(res.code, 200);
+    assert.deepStrictEqual(invocations, [
+      'plugin1 before',
+      'plugin0 before',
+      'secrets before',
+      'main',
+      'secrets after',
+      'plugin0 after',
+      'plugin1 after',
+    ]);
+  });
+
+  it('default can wrap raw adapter plugins', async () => {
+    const invocations = [];
+    process.env.K_SERVICE = 'simple-package--simple-name';
+    process.env.K_REVISION = '1.45.0';
+    const google = proxyquire('../src/google-adapter.js', {
+      './main.js': {
+        main: () => {
+          invocations.push('main');
+          return new Response('ok');
+        },
+      },
+    });
+    const handler = google.wrap(google.raw)
+      .with(createTestPlugin('plugin0', invocations))
+      .with(createTestPlugin('plugin1', invocations));
+
+    const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
+      host: 'us-central1-helix-225321.cloudfunctions.net',
+    });
+    const res = createMockResponse();
+    await handler(req, res);
+    assert.strictEqual(res.code, 200);
+    assert.deepStrictEqual(invocations, [
+      'plugin1 before',
+      'plugin0 before',
+      'main',
+      'plugin0 after',
+      'plugin1 after',
+    ]);
   });
 });

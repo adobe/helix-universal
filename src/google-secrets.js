@@ -10,7 +10,13 @@
  * governing permissions and limitations under the License.
  */
 
-async function getGoogleSecrets(functionName, projectID) {
+async function getGoogleSecrets(req) {
+  const functionName = process.env.K_SERVICE;
+  const [subdomain] = req.headers.host.split('.');
+  // eslint-disable-next-line no-unused-vars
+  const [country, region, ...servicename] = subdomain.split('-');
+  const projectID = servicename.join('-');
+
   const parent = `projects/${projectID}`;
   const packageName = functionName.replace(/--.*/, '').replace(/\./g, '_');
   const name = `${parent}/secrets/helix-deploy--${packageName}/versions/latest`;
@@ -35,4 +41,25 @@ async function getGoogleSecrets(functionName, projectID) {
   }
 }
 
-module.exports = getGoogleSecrets;
+/**
+ * Creates an google adapter plugin that retrieves secrets from the secret-manager.
+ * @param {function} fn the lambda handler to invoke
+ * @param {object} [opts] optional options
+ * @param {object} [opts.emulateEnv] ignores call to secret-manager and uses the provided
+ *                                   properties instead (used for testing)
+ * @returns {function(*, *): Promise<*>}
+ */
+function googleSecretsPlugin(fn, opts = {}) {
+  return async (req, res) => {
+    const secrets = opts.emulateEnv ?? await getGoogleSecrets(req);
+    // set secrets not present on process.env
+    Object.entries(secrets).forEach(([key, value]) => {
+      if (!(key in process.env)) {
+        process.env[key] = value;
+      }
+    });
+    return fn(req, res);
+  };
+}
+
+module.exports = googleSecretsPlugin;
