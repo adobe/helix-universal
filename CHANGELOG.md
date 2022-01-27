@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/adobe/helix-universal/compare/v2.0.1...v3.0.0) (2022-01-27)
+
+
+### Features
+
+* remove auto-enable epsagon in favour of a pluggable adapter mechanism ([2c98b52](https://github.com/adobe/helix-universal/commit/2c98b5275359b7b7fb9981a1a2f93093c0139c1e)), closes [#105](https://github.com/adobe/helix-universal/issues/105)
+
+
+### BREAKING CHANGES
+
+* epsagon is no longer auto-enabled and support for azure is removed
+
 ## [2.0.1](https://github.com/adobe/helix-universal/compare/v2.0.0...v2.0.1) (2022-01-24)
 
 
