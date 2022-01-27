@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/adobe/helix-universal/compare/v2.0.1...v2.1.0) (2022-01-27)
+
+
+### Features
+
+* remove auto-enable epsagon in favour of a pluggable adapter mechanism ([36f304f](https://github.com/adobe/helix-universal/commit/36f304f3e0bd5550520df28202983f696fc41536)), closes [#105](https://github.com/adobe/helix-universal/issues/105)
+
 ## [2.0.1](https://github.com/adobe/helix-universal/compare/v2.0.0...v2.0.1) (2022-01-24)
 
 
