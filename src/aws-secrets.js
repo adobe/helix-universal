@@ -74,7 +74,12 @@ async function getAWSSecrets(functionName, expiration) {
 function awsSecretsPlugin(fn, opts = {}) {
   return async (evt, context) => {
     const expiration = opts.expiration ?? CACHE_EXPIRATION;
-    const secrets = opts.emulateEnv ?? await getAWSSecrets(context.functionName, expiration);
+    const [
+      /* 'arn' */, /* 'aws' */, /* 'lambda' */,
+      /* region */, /* accountId */, /* 'function' */,
+      functionName,
+    ] = context.invokedFunctionArn.split(':');
+    const secrets = opts.emulateEnv ?? await getAWSSecrets(functionName, expiration);
     // set secrets not present on process.env
     Object.entries(secrets).forEach(([key, value]) => {
       if (!(key in process.env)) {
