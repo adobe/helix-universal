@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/adobe/helix-universal/compare/v3.0.0...v3.0.1) (2022-01-31)
+
+
+### Bug Fixes
+
+* use correct secrets decoding ([#108](https://github.com/adobe/helix-universal/issues/108)) ([f1ac917](https://github.com/adobe/helix-universal/commit/f1ac91784f33ca11af49650eef9fc0961ef60ca7))
+
 # [3.0.0](https://github.com/adobe/helix-universal/compare/v2.0.1...v3.0.0) (2022-01-27)
 
 
