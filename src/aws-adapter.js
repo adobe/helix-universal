@@ -64,7 +64,7 @@ async function lambdaAdapter(event, context) {
         package: packageName,
         version: functionAlias.replace(/_/g, '.'),
         fqn: context.invokedFunctionArn,
-        app: event.requestContext.apiId,
+        app: event.requestContext.apiId ?? `aws-${accountId}`,
       },
       invocation: {
         id: context.awsRequestId,

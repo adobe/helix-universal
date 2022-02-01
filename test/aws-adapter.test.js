@@ -531,7 +531,7 @@ describe('Adapter tests for AWS', () => {
             package: 'helix-pages',
             version: '4.3.1',
             fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
-            app: undefined,
+            app: 'aws-118435662149',
           });
           const { searchParams } = new URL(request.url);
           assert.strictEqual(searchParams.toString(), 'key1=value1&key2=value2&key3=value3');
@@ -573,7 +573,7 @@ describe('Adapter tests for AWS', () => {
             package: 'helix-pages',
             version: '4.3.1',
             fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
-            app: undefined,
+            app: 'aws-118435662149',
           });
           const json = await request.json();
           assert.deepStrictEqual(json, messageBody);
