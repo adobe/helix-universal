@@ -1,3 +1,10 @@
+## [3.0.2](https://github.com/adobe/helix-universal/compare/v3.0.1...v3.0.2) (2022-02-01)
+
+
+### Bug Fixes
+
+* provide sensible default for context.func.app used in Coralogix ([591db25](https://github.com/adobe/helix-universal/commit/591db2501e7cd1fc25a1351215a424d32f2ecffc))
+
 ## [3.0.1](https://github.com/adobe/helix-universal/compare/v3.0.0...v3.0.1) (2022-01-31)
 
 
