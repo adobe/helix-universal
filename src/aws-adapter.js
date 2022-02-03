@@ -115,6 +115,16 @@ async function lambdaAdapter(event, context) {
         body: e.message,
       };
     }
+    if (e instanceof SyntaxError) {
+      return {
+        statusCode: 400,
+        headers: {
+          'content-type': 'text/plain',
+          'x-invocation-id': context.awsRequestId,
+        },
+        body: e.message,
+      };
+    }
     // eslint-disable-next-line no-console
     console.error('error while invoking function', e);
     if (event.nonHttp) {

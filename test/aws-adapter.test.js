@@ -626,4 +626,35 @@ describe('Adapter tests for AWS', () => {
     });
     await assert.rejects(lambda({}, DEFAULT_CONTEXT), new Error('plugin kaput'));
   });
+
+  it('handles empty JSON', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async (request, context) => {
+          const body = await request.json();
+          return new Response(`okay: ${JSON.stringify(body)}`);
+        },
+      },
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT,
+      body: '',
+      requestContext: {
+        ...DEFAULT_EVENT.requestContext,
+        http: {
+          method: 'POST',
+          path: '/dump',
+          protocol: 'HTTP/1.1',
+        },
+      },
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+        'content-type': 'application/json',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 400);
+  });
 });
