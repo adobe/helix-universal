@@ -24,6 +24,11 @@ describe('Secrets tests for AWS', () => {
     process.env.AWS_ACCESS_KEY_ID = 'fake';
     process.env.AWS_SECRET_ACCESS_KEY = 'fake';
     nock = new Nock();
+
+    // clean require cache so that aws-sdk is loaded again and resets any internal cache
+    Object.keys(require.cache).forEach((key) => {
+      delete require.cache[key];
+    });
   });
 
   afterEach(() => {
