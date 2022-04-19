@@ -139,6 +139,7 @@ describe('Secrets tests for AWS', () => {
       await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
       assert.fail('expect rejection');
     } catch (e) {
+      console.log(e);
       assert.strictEqual(e.statusCode, 429);
     }
   });
