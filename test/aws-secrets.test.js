@@ -97,8 +97,8 @@ describe('Secrets tests for AWS', () => {
   it('handles errors from secret manager', async () => {
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
-      .times(4)
-      .reply(500);
+      .reply(500)
+      .persist();
     const plugin = awsSecretsPlugin(() => ({}), { expiration: 0 });
     await assert.rejects(plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' }));
     const body = { ...process.env };
