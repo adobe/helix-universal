@@ -3,8 +3,6 @@ executors:
   node14:
     docker:
       - image: cimg/node:14.19
-    environment:
-      NPM_CONFIG_PREFIX: ~/.npm-global
 
 commands:
   setup:
@@ -12,7 +10,7 @@ commands:
     - checkout
     - run:
         name: install latest npm
-        command: sudo npm -g install npm
+        command: npm -g install npm
     - run:
         name: Installing Dependencies
         command: npm ci
