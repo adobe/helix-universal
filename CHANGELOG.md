@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/adobe/helix-universal/compare/v3.0.10...v3.1.0) (2022-05-19)
+
+
+### Features
+
+* return response body for non-http events ([#138](https://github.com/adobe/helix-universal/issues/138)) ([778ee4a](https://github.com/adobe/helix-universal/commit/778ee4aa28c9cff0b374002b83c57b1b1f1f2532))
+
 ## [3.0.10](https://github.com/adobe/helix-universal/compare/v3.0.9...v3.0.10) (2022-05-16)
 
 
