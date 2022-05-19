@@ -577,7 +577,11 @@ describe('Adapter tests for AWS', () => {
           });
           const json = await request.json();
           assert.deepStrictEqual(json, messageBody);
-          return new Response('{}');
+          return new Response('{}', {
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
         },
       },
       './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
@@ -590,7 +594,7 @@ describe('Adapter tests for AWS', () => {
       },
       DEFAULT_CONTEXT,
     );
-    assert.strictEqual(res, '{}');
+    assert.deepStrictEqual(res, {});
   });
 
   it('handles errors when run without requestContext', async () => {
