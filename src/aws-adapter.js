@@ -96,11 +96,18 @@ async function lambdaAdapter(event, context) {
       await con.log.flush();
     }
     const isBase64Encoded = isBinary(response.headers);
+    const body = isBase64Encoded ? Buffer.from(await response.arrayBuffer()).toString('base64') : await response.text();
+
+    if (event.nonHttp) {
+      // directly return response body
+      return body;
+    }
+
     return {
       statusCode: response.status,
       headers: Object.fromEntries(response.headers.entries()),
       isBase64Encoded,
-      body: isBase64Encoded ? Buffer.from(await response.arrayBuffer()).toString('base64') : await response.text(),
+      body,
     };
   } catch (e) {
     if (e instanceof TypeError && e.code === 'ERR_INVALID_CHAR') {
