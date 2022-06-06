@@ -49,7 +49,7 @@
     "ghooks": "2.0.4",
     "jsdoc-to-markdown": "7.1.1",
     "junit-report-builder": "3.0.0",
-    "lint-staged": "12.5.0",
+    "lint-staged": "13.0.0",
     "mocha": "10.0.0",
     "nock": "13.2.6",
     "nyc": "15.1.0",
