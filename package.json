@@ -38,7 +38,7 @@
     "@semantic-release/changelog": "6.0.1",
     "@semantic-release/git": "10.0.1",
     "@semantic-release/npm": "9.0.1",
-    "aws-sdk": "2.1167.0",
+    "aws-sdk": "2.1171.0",
     "codecov": "3.8.3",
     "commitizen": "4.2.4",
     "cz-conventional-changelog": "3.3.0",
