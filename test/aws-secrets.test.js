@@ -48,7 +48,7 @@ describe('Secrets tests for AWS', () => {
         }];
       });
 
-    const plugin = awsSecretsPlugin(() => ({}), { expiration: 0 });
+    const plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
     await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
     const body = { ...process.env };
     Object.keys(processEnvCopy).forEach((key) => delete body[key]);
@@ -72,7 +72,7 @@ describe('Secrets tests for AWS', () => {
         }];
       });
 
-    let plugin = awsSecretsPlugin(() => ({}), { expiration: 0 });
+    let plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
     await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
     let body = { ...process.env };
     Object.keys(processEnvCopy).forEach((key) => delete body[key]);
@@ -99,7 +99,7 @@ describe('Secrets tests for AWS', () => {
       .post('/')
       .reply(500)
       .persist();
-    const plugin = awsSecretsPlugin(() => ({}), { expiration: 0 });
+    const plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
     await assert.rejects(plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' }));
     const body = { ...process.env };
     Object.keys(processEnvCopy).forEach((key) => delete body[key]);
@@ -116,7 +116,7 @@ describe('Secrets tests for AWS', () => {
       .reply(400, '', {
         'x-amzn-errortype': 'ResourceNotFoundException',
       });
-    const plugin = awsSecretsPlugin(() => ({}), { expiration: 0 });
+    const plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
     await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
     const body = { ...process.env };
     Object.keys(processEnvCopy).forEach((key) => delete body[key]);
@@ -134,12 +134,14 @@ describe('Secrets tests for AWS', () => {
         'x-amzn-errortype': 'ThrottlingException',
       })
       .persist();
-    const plugin = awsSecretsPlugin(() => ({}), { expiration: 0 });
     try {
+      const plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
       await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
       assert.fail('expect rejection');
     } catch (e) {
-      console.log(e);
+      if (!e.statusCode) {
+        throw e;
+      }
       assert.strictEqual(e.statusCode, 429);
     }
   });
