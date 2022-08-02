@@ -12,14 +12,14 @@
 const assert = require('assert');
 const crypto = require('crypto');
 const path = require('path');
-const fse = require('fs-extra');
+const fs = require('fs').promises;
 const util = require('util');
 const nock = require('nock');
 
 async function createTestRoot() {
   const dir = path.resolve(__dirname, 'tmp', crypto.randomBytes(16)
     .toString('hex'));
-  await fse.ensureDir(dir);
+  await fs.mkdir(dir, { recursive: true });
   return dir;
 }
 
