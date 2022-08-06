@@ -36,7 +36,7 @@
     "@google-cloud/storage": "6.3.0",
     "@semantic-release/changelog": "6.0.1",
     "@semantic-release/git": "10.0.1",
-    "aws-sdk": "2.1186.0",
+    "aws-sdk": "2.1189.0",
     "eslint": "8.21.0",
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.26.0",
