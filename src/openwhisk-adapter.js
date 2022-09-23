@@ -11,7 +11,7 @@
  */
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
 const querystring = require('querystring');
-const { Request } = require('@adobe/helix-fetch');
+const { Request } = require('@adobe/fetch');
 const {
   isBinary, isBinaryType, ensureUTF8Charset, ensureInvocationId, updateProcessEnv,
   cleanupHeaderValue,

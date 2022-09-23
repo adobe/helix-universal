@@ -14,7 +14,7 @@
 /* eslint-disable no-underscore-dangle */
 const assert = require('assert');
 const proxyquire = require('proxyquire').noCallThru();
-const { Response } = require('@adobe/helix-fetch');
+const { Response } = require('@adobe/fetch');
 const { createTestPlugin } = require('./utils.js');
 
 describe('OpenWhisk Adapter Test', () => {

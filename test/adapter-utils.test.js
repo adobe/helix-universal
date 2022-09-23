@@ -14,7 +14,7 @@
 /* eslint-disable no-underscore-dangle */
 
 const assert = require('assert');
-const { Response } = require('@adobe/helix-fetch');
+const { Response } = require('@adobe/fetch');
 const { isBinary, ensureUTF8Charset, ensureInvocationId } = require('../src/utils.js');
 
 describe('Adapter Utils Tests: ensureUTF8Encoding', () => {
