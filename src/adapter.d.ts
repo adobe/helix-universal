@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-import { Request, Response } from '@adobe/helix-fetch';
+import { Request, Response } from '@adobe/fetch';
 import { Resolver } from './resolver';
 
 /**

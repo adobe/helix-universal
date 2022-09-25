@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
-const { Response } = require('@adobe/helix-fetch');
+const { Response } = require('@adobe/fetch');
 const assert = require('assert');
 const proxyquire = require('proxyquire').noCallThru();
 const { proxySecretsPlugin, createTestPlugin } = require('./utils.js');
