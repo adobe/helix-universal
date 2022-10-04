@@ -630,4 +630,62 @@ describe('Adapter tests for AWS', () => {
     });
     await assert.rejects(lambda({}, DEFAULT_CONTEXT), new Error('plugin kaput'));
   });
+
+  it('can be run as an event listener', async () => {
+    const event = {
+      id: '4617e102-cbce-5b5a-3162-79727cb56ec3',
+      'detail-type': 'MediaConvert Job State Change',
+      source: 'aws.mediaconvert',
+      account: '118435662149',
+      time: '2022-10-04T15:13:47Z',
+      region: 'us-east-1',
+      resources: [
+        'arn:aws:mediaconvert:us-east-1:118435662149:jobs/1664896423845-2jjn2v',
+      ],
+      detail: {
+        timestamp: 1664896427263,
+        accountId: '118435662149',
+        queue: 'arn:aws:mediaconvert:us-east-1:118435662149:queues/Default',
+        jobId: '1664896423845-2jjn2v',
+        status: 'PROGRESSING',
+        userMetadata: {},
+      },
+    };
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        main: async (request, context) => {
+          assert.deepStrictEqual(context.event, {
+            type: 'MediaConvert Job State Change',
+            source: 'aws.mediaconvert',
+            time: '2022-10-04T15:13:47Z',
+            resources: [
+              'arn:aws:mediaconvert:us-east-1:118435662149:jobs/1664896423845-2jjn2v',
+            ],
+            detail: {
+              timestamp: 1664896427263,
+              accountId: '118435662149',
+              queue: 'arn:aws:mediaconvert:us-east-1:118435662149:queues/Default',
+              jobId: '1664896423845-2jjn2v',
+              status: 'PROGRESSING',
+              userMetadata: {},
+            },
+          });
+          assert.deepStrictEqual(context.func, {
+            name: 'dump',
+            package: 'helix-pages',
+            version: '4.3.1',
+            fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
+            app: 'aws-118435662149',
+          });
+          return new Response('ok');
+        },
+      },
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+    const res = await lambda(
+      event,
+      DEFAULT_CONTEXT,
+    );
+    assert.deepStrictEqual(res, 'ok');
+  });
 });

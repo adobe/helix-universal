@@ -83,6 +83,17 @@ async function lambdaAdapter(event, context) {
       con.records = event.Records;
     }
 
+    // support for Amazen EventBridge, remember event and details
+    if (event.detail) {
+      con.event = {
+        type: event['detail-type'],
+        source: event.source,
+        time: event.time,
+        resources: event.resources,
+        detail: event.detail,
+      };
+    }
+
     updateProcessEnv(con);
     // eslint-disable-next-line import/no-unresolved,global-require
     const { main } = require('./main.js');
