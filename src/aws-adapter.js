@@ -57,7 +57,7 @@ async function lambdaAdapter(event, context) {
     const queryString = nonHttp ? eventToQueryString(event) : event.rawQueryString || '';
 
     const request = new Request(`https://${host}${path}${queryString ? '?' : ''}${queryString}`, {
-      method: event.requestContext?.http?.method ?? '',
+      method: event.requestContext?.http?.method,
       headers,
       body: event.isBase64Encoded ? Buffer.from(event.body, 'base64') : event.body,
     });
