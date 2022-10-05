@@ -234,6 +234,7 @@ describe('Adapter tests for AWS', () => {
       './main.js': {
         main: (request, context) => {
           delete context.invocation.deadline;
+          delete context.invocation.event;
           assert.deepStrictEqual(context.invocation, {
             id: '535f0399-9c90-4042-880e-620cfec6af55',
             requestId: 'bjKNYhHcoAMEJIw=',
@@ -257,6 +258,7 @@ describe('Adapter tests for AWS', () => {
       './main.js': {
         main: (request, context) => {
           delete context.invocation.deadline;
+          delete context.invocation.event;
           assert.deepStrictEqual(context.invocation, {
             id: '535f0399-9c90-4042-880e-620cfec6af55',
             requestId: 'bjKNYhHcoAMEJIw=',
@@ -654,22 +656,7 @@ describe('Adapter tests for AWS', () => {
     const lambda = proxyquire('../src/aws-adapter.js', {
       './main.js': {
         main: async (request, context) => {
-          assert.deepStrictEqual(context.event, {
-            type: 'MediaConvert Job State Change',
-            source: 'aws.mediaconvert',
-            time: '2022-10-04T15:13:47Z',
-            resources: [
-              'arn:aws:mediaconvert:us-east-1:118435662149:jobs/1664896423845-2jjn2v',
-            ],
-            detail: {
-              timestamp: 1664896427263,
-              accountId: '118435662149',
-              queue: 'arn:aws:mediaconvert:us-east-1:118435662149:queues/Default',
-              jobId: '1664896423845-2jjn2v',
-              status: 'PROGRESSING',
-              userMetadata: {},
-            },
-          });
+          assert.deepStrictEqual(context.invocation.event, event);
           assert.deepStrictEqual(context.func, {
             name: 'dump',
             package: 'helix-pages',

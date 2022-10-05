@@ -19,21 +19,45 @@ const { AWSResolver } = require('./resolver.js');
 const { AWSStorage } = require('./aws-storage');
 
 /**
+ * Given an event, builds a query string out of the string-valued properties of
+ * the event.
+ *
+ * @param event AWS event
+ * @returns query string
+ */
+function eventToQueryString(event) {
+  const searchParams = new URLSearchParams();
+  Object.getOwnPropertyNames(event).forEach((name) => {
+    const value = event[name];
+    if (typeof value === 'string') {
+      searchParams.append(name, value);
+    }
+  });
+  return searchParams.toString();
+}
+
+/**
  * The raw universal adapter for lambda functions
  * @param {object} event AWS Lambda event
  * @param {object} context AWS Lambda context
  * @returns {*} lambda response
  */
 async function lambdaAdapter(event, context) {
+  const nonHttp = (!event.requestContext);
+
   try {
     // add cookie header if missing
-    const { headers } = event;
+    const { headers = {} } = event;
     if (!headers.cookie && event.cookies) {
       headers.cookie = event.cookies.join(';');
     }
 
-    const request = new Request(`https://${event.requestContext.domainName}${event.rawPath}${event.rawQueryString ? '?' : ''}${event.rawQueryString}`, {
-      method: event.requestContext.http.method,
+    const host = event.requestContext?.domainName || 'unknown';
+    const path = event.rawPath || '/';
+    const queryString = nonHttp ? eventToQueryString(event) : event.rawQueryString || '';
+
+    const request = new Request(`https://${host}${path}${queryString ? '?' : ''}${queryString}`, {
+      method: event.requestContext?.http?.method || '',
       headers,
       body: event.isBase64Encoded ? Buffer.from(event.body, 'base64') : event.body,
     });
@@ -64,13 +88,14 @@ async function lambdaAdapter(event, context) {
         package: packageName,
         version: functionAlias.replace(/_/g, '.'),
         fqn: context.invokedFunctionArn,
-        app: event.requestContext.apiId ?? `aws-${accountId}`,
+        app: event.requestContext?.apiId ?? `aws-${accountId}`,
       },
       invocation: {
         id: context.awsRequestId,
         deadline: Date.now() + context.getRemainingTimeInMillis(),
         transactionId: request.headers.get('x-transaction-id') || request.headers.get('x-amzn-trace-id'),
-        requestId: event.requestContext.requestId,
+        requestId: event.requestContext?.requestId || 'n/a',
+        event,
       },
       env: {
         ...process.env,
@@ -81,17 +106,6 @@ async function lambdaAdapter(event, context) {
     // support for Amazon SQS, remember records passed by trigger
     if (event.Records) {
       con.records = event.Records;
-    }
-
-    // support for Amazen EventBridge, remember event and details
-    if (event.detail) {
-      con.event = {
-        type: event['detail-type'],
-        source: event.source,
-        time: event.time,
-        resources: event.resources,
-        detail: event.detail,
-      };
     }
 
     updateProcessEnv(con);
@@ -107,7 +121,7 @@ async function lambdaAdapter(event, context) {
       await con.log.flush();
     }
 
-    if (event.nonHttp) {
+    if (nonHttp) {
       // directly return response body
       if (response.headers.get('content-type') === 'application/json') {
         return await response.json();
@@ -139,7 +153,7 @@ async function lambdaAdapter(event, context) {
     }
     // eslint-disable-next-line no-console
     console.error('error while invoking function', e);
-    if (event.nonHttp) {
+    if (nonHttp) {
       // let caller see the exception thrown
       throw e;
     }
@@ -158,25 +172,10 @@ async function lambdaAdapter(event, context) {
 function wrap(adapter) {
   const wrapped = async (evt, ctx) => {
     try {
-      evt.nonHttp = (!evt.requestContext);
-      if (evt.nonHttp) {
-        // mimic minimal requirements for our environment setup in lambdaAdapter
-        const searchParams = new URLSearchParams();
-        Object.getOwnPropertyNames(evt).forEach((name) => {
-          const value = evt[name];
-          if (typeof value === 'string') {
-            searchParams.append(name, value);
-          }
-        });
-        evt.rawPath = '';
-        evt.rawQueryString = searchParams.toString();
-        evt.headers = {};
-        evt.requestContext = { http: {} };
-      }
       // intentional await to catch errors
       return await adapter(evt, ctx);
     } catch (e) {
-      if (evt.nonHttp) {
+      if (!evt.requestContext) {
         // let caller see the exception thrown
         throw e;
       }
