@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/adobe/helix-universal/compare/v3.1.3...v3.2.0) (2022-10-05)
+
+
+### Features
+
+* support for AWS EventBridge event-based rules ([#166](https://github.com/adobe/helix-universal/issues/166)) ([87634e0](https://github.com/adobe/helix-universal/commit/87634e015e5905db923315d5a3a71dadfbc85b0d))
+
 ## [3.1.3](https://github.com/adobe/helix-universal/compare/v3.1.2...v3.1.3) (2022-09-25)
 
 
