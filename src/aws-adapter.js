@@ -52,8 +52,8 @@ async function lambdaAdapter(event, context) {
       headers.cookie = event.cookies.join(';');
     }
 
-    const host = event.requestContext?.domainName ?? 'unknown';
-    const path = event.rawPath || '/';
+    const host = event.requestContext?.domainName;
+    const path = event.rawPath ?? '';
     const queryString = nonHttp ? eventToQueryString(event) : event.rawQueryString || '';
 
     const request = new Request(`https://${host}${path}${queryString ? '?' : ''}${queryString}`, {
@@ -94,7 +94,7 @@ async function lambdaAdapter(event, context) {
         id: context.awsRequestId,
         deadline: Date.now() + context.getRemainingTimeInMillis(),
         transactionId: request.headers.get('x-transaction-id') || request.headers.get('x-amzn-trace-id'),
-        requestId: event.requestContext?.requestId ?? 'n/a',
+        requestId: event.requestContext?.requestId,
         event,
       },
       env: {
