@@ -110,7 +110,7 @@ class AWSResolver extends Resolver {
   constructor(event) {
     super(event.headers);
     Object.assign(this, {
-      _host: event.requestContext.domainName,
+      _host: event.requestContext?.domainName,
     });
   }
 
