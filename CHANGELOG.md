@@ -1,3 +1,10 @@
+## [3.2.2](https://github.com/adobe/helix-universal/compare/v3.2.1...v3.2.2) (2022-10-14)
+
+
+### Bug Fixes
+
+* detect and use multiValueHeaders ([#170](https://github.com/adobe/helix-universal/issues/170)) ([2f8746a](https://github.com/adobe/helix-universal/commit/2f8746a7f2373f5c9ff4f71325c87333cb1de9e7))
+
 ## [3.2.1](https://github.com/adobe/helix-universal/compare/v3.2.0...v3.2.1) (2022-10-13)
 
 
