@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
-const { Request, Response } = require('@adobe/fetch');
+const { Request, Response, Headers } = require('@adobe/fetch');
 const assert = require('assert');
 const proxyquire = require('proxyquire').noCallThru();
 const { createTestPlugin, proxySecretsPlugin } = require('./utils.js');
@@ -522,6 +522,36 @@ describe('Adapter tests for AWS', () => {
       },
     }, DEFAULT_CONTEXT);
     assert.strictEqual(res.statusCode, 200);
+  });
+
+  it('handles multiple set-cookie headers', async () => {
+    const lambda = proxyquire('../src/aws-adapter.js', {
+      './main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async () => {
+          const headers = new Headers();
+          headers.append('set-cookie', 't=1; Secure');
+          headers.append('set-cookie', 'u=2; Secure');
+          return new Response('okay', { headers });
+        },
+      },
+      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT,
+      cookies: [
+      ],
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
+    assert.deepStrictEqual(res.multiValueHeaders['set-cookie'], [
+      't=1; Secure',
+      'u=2; Secure',
+    ]);
   });
 
   it('can be run without requestContext', async () => {

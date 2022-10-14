@@ -37,6 +37,30 @@ function eventToQueryString(event) {
 }
 
 /**
+ * Given a raw headers object, returns an object containing single and multivalued
+ * headers, separately.
+ *
+ * @param raw raw headers object
+ * @returns object containing a property 'headers' and a property 'multiValueHeaders'
+ */
+function splitHeaders(raw) {
+  const headers = {};
+  const multiValueHeaders = {};
+
+  Object.entries(raw).forEach(([name, value]) => {
+    if (Array.isArray(value)) {
+      multiValueHeaders[name] = value;
+    } else {
+      headers[name] = value;
+    }
+  });
+  return {
+    headers,
+    multiValueHeaders,
+  };
+}
+
+/**
  * The raw universal adapter for lambda functions
  * @param {object} event AWS Lambda event
  * @param {object} context AWS Lambda context
@@ -134,7 +158,7 @@ async function lambdaAdapter(event, context) {
 
     return {
       statusCode: response.status,
-      headers: Object.fromEntries(response.headers.entries()),
+      ...splitHeaders(response.headers.raw()),
       isBase64Encoded,
       body,
     };
