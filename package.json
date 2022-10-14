@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "scripts": {
-    "test": " nyc mocha",
+    "test": "nyc mocha --spec=test/**/*.test.js",
     "lint": "eslint .",
     "semantic-release": "semantic-release",
     "prepare": "husky install"
@@ -20,14 +20,13 @@
     "url": "https://github.com/adobe/helix-universal/issues"
   },
   "mocha": {
-    "spec": "test/**/*.test.js",
     "recursive": "true",
     "reporter": "mocha-multi-reporters",
     "reporter-options": "configFile=.mocha-multi.json"
   },
   "homepage": "https://github.com/adobe/helix-universal#readme",
   "dependencies": {
-    "@adobe/fetch": "3.2.0",
+    "@adobe/fetch": "3.2.1",
     "mocha-multi-reporters": "^1.5.1"
   },
   "devDependencies": {
