@@ -40,8 +40,8 @@ function eventToQueryString(event) {
  * Given a raw headers object, returns an object containing single and multivalued
  * headers, separately.
  *
- * @param headers raw headers object
- * @returns object containing single and multivalued headers
+ * @param raw raw headers object
+ * @returns object containing a property 'headers' and a property 'multiValueHeaders'
  */
 function splitHeaders(raw) {
   const headers = {};
