@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/adobe/helix-universal#readme",
   "dependencies": {
-    "@adobe/fetch": "3.2.1",
+    "@adobe/fetch": "3.3.0",
     "mocha-multi-reporters": "^1.5.1"
   },
   "devDependencies": {
