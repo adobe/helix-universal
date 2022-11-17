@@ -86,6 +86,8 @@ describe('Adapter tests for AWS', () => {
             fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
             app: 'kvvyh7ikcb',
           });
+          assert.ok(context.log);
+          assert.strictEqual(typeof context.log.silly, 'function');
           return new Response('ok');
         },
       },
