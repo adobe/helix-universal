@@ -97,6 +97,14 @@ async function lambdaAdapter(event, context) {
     ] = context.invokedFunctionArn.split(':');
     const [packageName, name] = functionName.split('--');
 
+    const log = {};
+    ['log', 'silly:debug', 'trace:debug', 'debug', 'verbose:debug', 'info', 'warn', 'error', 'fatal:error']
+      .forEach((m) => {
+        const [k, v] = m.split(':');
+        // eslint-disable-next-line no-console
+        log[k] = console[v ?? k].bind(console);
+      });
+
     const con = {
       resolver: new AWSResolver(event),
       pathInfo: {
@@ -125,6 +133,7 @@ async function lambdaAdapter(event, context) {
         ...process.env,
       },
       storage: AWSStorage,
+      log,
     };
 
     // support for Amazon SQS, remember records passed by trigger
