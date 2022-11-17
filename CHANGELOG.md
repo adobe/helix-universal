@@ -1,3 +1,10 @@
+# [3.3.0](https://github.com/adobe/helix-universal/compare/v3.2.3...v3.3.0) (2022-11-17)
+
+
+### Features
+
+* provide simple context.log ([#179](https://github.com/adobe/helix-universal/issues/179)) ([61e1d9f](https://github.com/adobe/helix-universal/commit/61e1d9f4a53a7d3fe0f9ddd45604acdd853e28c9))
+
 ## [3.2.3](https://github.com/adobe/helix-universal/compare/v3.2.2...v3.2.3) (2022-10-25)
 
 
