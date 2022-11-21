@@ -1,3 +1,10 @@
+## [3.3.1](https://github.com/adobe/helix-universal/compare/v3.3.0...v3.3.1) (2022-11-21)
+
+
+### Bug Fixes
+
+* add default logger also to google and adobeio ([#181](https://github.com/adobe/helix-universal/issues/181)) ([6ff0bea](https://github.com/adobe/helix-universal/commit/6ff0bea7d43b34e6fa2ae79fa4d5d5c6525b9318))
+
 # [3.3.0](https://github.com/adobe/helix-universal/compare/v3.2.3...v3.3.0) (2022-11-17)
 
 
