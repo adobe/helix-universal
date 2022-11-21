@@ -14,7 +14,7 @@ const querystring = require('querystring');
 const { Request } = require('@adobe/fetch');
 const {
   isBinary, isBinaryType, ensureUTF8Charset, ensureInvocationId, updateProcessEnv,
-  cleanupHeaderValue,
+  cleanupHeaderValue, createDefaultLogger,
 } = require('./utils.js');
 
 const { OpenwhiskResolver } = require('./resolver.js');
@@ -101,6 +101,7 @@ async function openwhiskAdapter(params) {
       requestId: headers['x-request-id'],
     },
     env,
+    log: createDefaultLogger(),
   };
 
   updateProcessEnv(context);
