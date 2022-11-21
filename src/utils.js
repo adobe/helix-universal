@@ -104,6 +104,21 @@ function cleanupHeaderValue(value) {
 
 const HEALTHCHECK_PATH = '/_status_check/healthcheck.json';
 
+/**
+ * Creates a default helix-log compatible console logger.
+ * @returns {Logger}
+ */
+function createDefaultLogger() {
+  const log = {};
+  ['log', 'silly:debug', 'trace:debug', 'debug', 'verbose:debug', 'info', 'warn', 'error', 'fatal:error']
+    .forEach((m) => {
+      const [k, v] = m.split(':');
+      // eslint-disable-next-line no-console
+      log[k] = console[v ?? k].bind(console);
+    });
+  return log;
+}
+
 module.exports = {
   isBinary,
   isBinaryType,
@@ -111,6 +126,7 @@ module.exports = {
   ensureInvocationId,
   updateProcessEnv,
   cleanupHeaderValue,
+  createDefaultLogger,
   HEALTHCHECK_PATH,
 };
 

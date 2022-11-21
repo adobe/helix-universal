@@ -13,6 +13,7 @@
 const { Request } = require('@adobe/fetch');
 const {
   isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, cleanupHeaderValue,
+  createDefaultLogger,
 } = require('./utils.js');
 const googleSecretsPlugin = require('./google-secrets.js');
 
@@ -63,6 +64,7 @@ async function googleAdapter(req, res) {
       env: {
         ...process.env,
       },
+      log: createDefaultLogger(),
       storage: GoogleStorage,
     };
 
