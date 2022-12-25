@@ -1,3 +1,10 @@
+## [3.3.2](https://github.com/adobe/helix-universal/compare/v3.3.1...v3.3.2) (2022-12-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/fetch to v3.3.1 ([509da7e](https://github.com/adobe/helix-universal/commit/509da7e18491d99868284ea90c4bcfae69a715f4))
+
 ## [3.3.1](https://github.com/adobe/helix-universal/compare/v3.3.0...v3.3.1) (2022-11-21)
 
 
