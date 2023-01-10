@@ -1,3 +1,10 @@
+## [3.3.3](https://github.com/adobe/helix-universal/compare/v3.3.2...v3.3.3) (2023-01-10)
+
+
+### Bug Fixes
+
+* use fetch for secrets manager ([#193](https://github.com/adobe/helix-universal/issues/193)) ([816267d](https://github.com/adobe/helix-universal/commit/816267d1fba29fdde47bcf403b5604770417220d))
+
 ## [3.3.2](https://github.com/adobe/helix-universal/compare/v3.3.1...v3.3.2) (2022-12-25)
 
 
