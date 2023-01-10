@@ -94,6 +94,59 @@ describe('Secrets tests for AWS', () => {
     });
   });
 
+  it('checks cache after configured time', async () => {
+    const now = Date.now();
+    nock('https://secretsmanager.us-east-1.amazonaws.com/')
+      .post('/')
+      .reply((uri, body) => {
+        assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
+        return [200,
+          { SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }) },
+          { 'content-type': 'application/json' },
+        ];
+      });
+
+    let plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
+    await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
+
+    // should recheck cache
+    nock('https://secretsmanager.us-east-1.amazonaws.com/')
+      .post('/')
+      .reply((uri, body) => {
+        assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
+        return [200,
+          { LastChangedDate: now / 1000 }, { 'content-type': 'application/json' },
+        ];
+      });
+
+    plugin = awsSecretsPlugin(() => ({}), { expiration: 1000, checkDelay: 1 });
+    await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
+  });
+
+  it('handles error in check cache', async () => {
+    nock('https://secretsmanager.us-east-1.amazonaws.com/')
+      .post('/')
+      .reply((uri, body) => {
+        assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
+        return [200,
+          { SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }) },
+          { 'content-type': 'application/json' },
+        ];
+      });
+
+    let plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
+    await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
+
+    nock('https://secretsmanager.us-east-1.amazonaws.com/')
+      .post('/')
+      .reply(429, '', {
+        'x-amzn-errortype': 'ThrottlingException',
+      });
+
+    plugin = awsSecretsPlugin(() => ({}), { expiration: 1000, checkDelay: 1 });
+    await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
+  });
+
   it('handles errors from secret manager', async () => {
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
@@ -127,6 +180,18 @@ describe('Secrets tests for AWS', () => {
     });
   });
 
+  it('handles 400 JSON response from secret manager', async () => {
+    nock('https://secretsmanager.us-east-1.amazonaws.com/')
+      .post('/')
+      .reply(400, JSON.stringify({
+        __type: 'ResourceNotFoundException', Message: 'Secrets Manager can\'t find the specified secret.',
+      }), {
+        'content-type': 'application/x-amz-json-1.1',
+      });
+    const plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
+    await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
+  });
+
   it('handles 429 from secret manager', async () => {
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
@@ -144,5 +209,14 @@ describe('Secrets tests for AWS', () => {
       }
       assert.strictEqual(e.statusCode, 429);
     }
+  });
+
+  it('handles missng AWS settings', async () => {
+    const plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
+    delete process.env.AWS_SECRET_ACCESS_KEY;
+    await assert.rejects(
+      async () => plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' }),
+      /unable to load function params/,
+    );
   });
 });

@@ -22,11 +22,15 @@
   "mocha": {
     "recursive": "true",
     "reporter": "mocha-multi-reporters",
-    "reporter-options": "configFile=.mocha-multi.json"
+    "reporter-options": "configFile=.mocha-multi.json",
+    "require": [
+      "test/setup-env.js"
+    ]
   },
   "homepage": "https://github.com/adobe/helix-universal#readme",
   "dependencies": {
     "@adobe/fetch": "3.3.1",
+    "aws4": "1.12.0",
     "mocha-multi-reporters": "^1.5.1"
   },
   "devDependencies": {
