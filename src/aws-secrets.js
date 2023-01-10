@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const { describeSecret, getSecretValue } = require('./aws-secretsmanager.js');
+const SecretsManager = require('./aws-secretsmanager.js');
 
 const CACHE_EXPIRATION = 60 * 60 * 1000; // 1 hour
 const CHECK_DELAY = 60 * 1000; // 1 minute
@@ -20,9 +20,9 @@ const cache = {
   data: null,
 };
 
-async function getLastChangedDate(secretId) {
+async function getLastChangedDate(sm, secretId) {
   try {
-    const { LastChangedDate } = await describeSecret(secretId);
+    const { LastChangedDate } = await sm.describeSecret(secretId);
     return LastChangedDate * 1000;
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -31,9 +31,9 @@ async function getLastChangedDate(secretId) {
   }
 }
 
-async function loadAWSSecrets(secretId) {
+async function loadAWSSecrets(sm, secretId) {
   try {
-    const { SecretString } = await getSecretValue(secretId);
+    const { SecretString } = await sm.getSecretValue(secretId);
     return JSON.parse(SecretString);
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -50,6 +50,7 @@ async function loadAWSSecrets(secretId) {
 }
 
 async function getAWSSecrets(functionName, expiration, checkDelay) {
+  const sm = new SecretsManager(process.env);
   const secretId = `/helix-deploy/${functionName.replace(/--.*/, '')}/all`;
   const now = Date.now();
   let lastChanged = 0;
@@ -57,11 +58,11 @@ async function getAWSSecrets(functionName, expiration, checkDelay) {
   if (!cache.checked) {
     cache.checked = now;
   } else if (now > cache.checked + checkDelay) {
-    lastChanged = await getLastChangedDate(secretId);
+    lastChanged = await getLastChangedDate(sm, secretId);
     cache.checked = Date.now();
   }
   if (!cache.data || now > cache.loaded + expiration || lastChanged > cache.loaded) {
-    const params = await loadAWSSecrets(secretId);
+    const params = await loadAWSSecrets(sm, secretId);
     const nower = Date.now();
     // eslint-disable-next-line no-console
     console.info(`loaded ${Object.entries(params).length} package parameter in ${nower - now}ms`);
