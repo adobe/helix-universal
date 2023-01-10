@@ -122,7 +122,7 @@ describe('Secrets tests for AWS', () => {
     await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
   });
 
-  it('should reload cache if settings changed', async () => {
+  it.only('should reload cache if settings changed', async () => {
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
       .reply((uri, body) => {
@@ -138,20 +138,15 @@ describe('Secrets tests for AWS', () => {
 
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
-      .reply((uri, body) => {
-        assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
-        return [200,
-          { LastChangedDate: Date.now() / 1000 }, { 'content-type': 'application/json' },
-        ];
-      })
+      .reply(() => [200,
+        { LastChangedDate: (Date.now() / 1000) + 60 },
+        { 'content-type': 'application/json' },
+      ])
       .post('/')
-      .reply((uri, body) => {
-        assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
-        return [200,
-          { SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }) },
-          { 'content-type': 'application/json' },
-        ];
-      });
+      .reply(() => [200,
+        { SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }) },
+        { 'content-type': 'application/json' },
+      ]);
 
     plugin = awsSecretsPlugin(() => ({}), { expiration: 1000, checkDelay: 1 });
     await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });

@@ -23,7 +23,7 @@ const cache = {
 async function getLastChangedDate(secretId) {
   try {
     const { LastChangedDate } = await describeSecret(secretId);
-    return new Date(LastChangedDate * 1000);
+    return LastChangedDate * 1000;
   } catch (e) {
     // eslint-disable-next-line no-console
     console.warn(`unable to fetch secret description '${secretId}'`, e);
