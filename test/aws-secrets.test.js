@@ -136,13 +136,20 @@ describe('Secrets tests for AWS', () => {
     let plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
     await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
 
-    // should recheck cache
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
       .reply((uri, body) => {
         assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
         return [200,
           { LastChangedDate: Date.now() / 1000 }, { 'content-type': 'application/json' },
+        ];
+      })
+      .post('/')
+      .reply((uri, body) => {
+        assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
+        return [200,
+          { SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }) },
+          { 'content-type': 'application/json' },
         ];
       });
 
