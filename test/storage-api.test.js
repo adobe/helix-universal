@@ -12,9 +12,9 @@
 /* eslint-env mocha */
 const assert = require('assert');
 const path = require('path');
-const AWSStorage = require('../src/aws-storage');
-const GoogleStorage = require('../src/google-storage');
-const Storage = require('../src/storage-api');
+const AWSStorage = require('../src/aws-storage.js');
+const GoogleStorage = require('../src/google-storage.js');
+const Storage = require('../src/storage-api.js');
 
 describe('AWS Storage API Unit Tests', () => {
   let processEnvCopy;

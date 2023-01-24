@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-const AbstractStorage = require('./storage-api');
+const AbstractStorage = require('./storage-api.js');
 
 let storage;
 

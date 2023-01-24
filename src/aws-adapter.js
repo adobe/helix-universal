@@ -17,7 +17,7 @@ const {
 } = require('./utils.js');
 const awsSecretsPlugin = require('./aws-secrets.js');
 const { AWSResolver } = require('./resolver.js');
-const { AWSStorage } = require('./aws-storage');
+const { AWSStorage } = require('./aws-storage.js');
 
 /**
  * Given an event, builds a query string out of the string-valued properties of
