@@ -10,11 +10,12 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
-const { Request, Response, Headers } = require('@adobe/fetch');
-const assert = require('assert');
-const proxyquire = require('proxyquire').noCallThru();
-const { createTestPlugin, proxySecretsPlugin } = require('./utils.js');
-const awsSecretsPlugin = require('../src/aws-secrets.js');
+import { Headers, Request, Response } from '@adobe/fetch';
+import assert from 'assert';
+import esmock from 'esmock';
+import { createTestPlugin, proxySecretsPlugin } from './utils.js';
+
+import awsSecretsPlugin from '../src/aws-secrets.js';
 
 const DEFAULT_EVENT = {
   version: '2.0',
@@ -76,8 +77,8 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('runs the function', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => {
           assert.deepStrictEqual(context.func, {
             name: 'dump',
@@ -91,15 +92,15 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
     assert.strictEqual(res.statusCode, 200);
   });
 
   it('can invoke the raw handler', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => {
           assert.deepStrictEqual(context.func, {
             name: 'dump',
@@ -118,14 +119,14 @@ describe('Adapter tests for AWS', () => {
 
   it('default can wrap more plugins', async () => {
     const invocations = [];
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: () => {
           invocations.push('main');
           return new Response('ok');
         },
       },
-      './aws-secrets.js': createTestPlugin('secrets', invocations),
+      '../src/aws-secrets.js': createTestPlugin('secrets', invocations),
     });
     const handler = lambda
       .with(createTestPlugin('plugin0', invocations))
@@ -146,8 +147,8 @@ describe('Adapter tests for AWS', () => {
 
   it('default can wrap raw adapter plugins', async () => {
     const invocations = [];
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: () => {
           invocations.push('main');
           return new Response('ok');
@@ -171,8 +172,8 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('when run with no version in functionArn use $LATEST', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => {
           assert.deepStrictEqual(context.func, {
             name: 'dump',
@@ -184,7 +185,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(DEFAULT_EVENT, {
       ...DEFAULT_CONTEXT,
@@ -194,11 +195,11 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('provides package params, local env wins', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin, {
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin, {
         SOME_SECRET: 'pssst',
         AWS_TEST_PARAM: 'abc',
       }),
@@ -215,11 +216,11 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('raw adapter doesnt call package params', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin, {
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin, {
         SOME_SECRET: 'pssst',
         AWS_TEST_PARAM: 'abc',
       }),
@@ -232,8 +233,8 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('context.invocation', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => {
           delete context.invocation.deadline;
           delete context.invocation.event;
@@ -245,7 +246,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
     assert.strictEqual(res.statusCode, 200);
@@ -256,8 +257,8 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('context.invocation (external transaction id)', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => {
           delete context.invocation.deadline;
           delete context.invocation.event;
@@ -269,7 +270,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda({
       ...DEFAULT_EVENT,
@@ -282,11 +283,11 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handles illegal request headers with 400', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: () => new Response('ok'),
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda({
       ...DEFAULT_EVENT,
@@ -303,13 +304,13 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handles error in function', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: () => {
           throw new Error('function kaput');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda({
       ...DEFAULT_EVENT,
@@ -326,13 +327,13 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handles error in plugin ', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: () => {
           throw new Error('function kaput');
         },
       },
-      './aws-secrets.js': () => async () => {
+      '../src/aws-secrets.js': () => async () => {
         throw new Error('plugin kaput');
       },
     });
@@ -352,8 +353,8 @@ describe('Adapter tests for AWS', () => {
 
   it('flushes log', async () => {
     let logFlushed = 0;
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: (req, ctx) => {
           ctx.log = {
             flush() {
@@ -363,7 +364,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
     assert.strictEqual(res.statusCode, 200);
@@ -371,15 +372,15 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handle binary request body', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
           assert.deepStrictEqual(await request.json(), { goo: 'haha' });
           return new Response('okay');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda({
@@ -403,8 +404,8 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handle binary response body', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => new Response(Buffer.from('binary', 'utf-8'), {
           headers: {
@@ -412,7 +413,7 @@ describe('Adapter tests for AWS', () => {
           },
         }),
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
@@ -422,8 +423,8 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handles request params', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
           const url = new URL(request.url);
@@ -432,7 +433,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('okay');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda({
@@ -446,15 +447,15 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handles pathInfo', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
           assert.strictEqual(context.pathInfo.suffix, '/status');
           return new Response('okay');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda({
@@ -470,8 +471,8 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handles event cookies params', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
           assert.deepStrictEqual(request.headers.plain(), {
@@ -481,7 +482,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('okay');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda({
@@ -499,8 +500,8 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handles preserves cookie header', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
           assert.deepStrictEqual(request.headers.plain(), {
@@ -510,7 +511,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('okay');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda({
@@ -527,8 +528,8 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handles multiple set-cookie headers', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async () => {
           const headers = new Headers();
@@ -537,7 +538,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('okay', { headers });
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
 
     const res = await lambda({
@@ -557,8 +558,8 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('can be run without requestContext', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => {
           assert.deepStrictEqual(context.func, {
             name: 'dump',
@@ -572,7 +573,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(
       {
@@ -592,8 +593,8 @@ describe('Adapter tests for AWS', () => {
       key2: 'value2',
       key3: 'value3',
     };
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: async (request, context) => {
           if (context.records) {
             const { body } = context.records[0];
@@ -618,7 +619,7 @@ describe('Adapter tests for AWS', () => {
           });
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(
       {
@@ -632,13 +633,13 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('handles errors when run without requestContext', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: () => {
           throw new Error('function kaput');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     await assert.rejects(async () => lambda(
       {
@@ -652,13 +653,13 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('throws errors for non http events', async () => {
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: () => {
           throw new Error('function kaput');
         },
       },
-      './aws-secrets.js': () => async () => {
+      '../src/aws-secrets.js': () => async () => {
         throw new Error('plugin kaput');
       },
     });
@@ -685,8 +686,8 @@ describe('Adapter tests for AWS', () => {
         userMetadata: {},
       },
     };
-    const lambda = proxyquire('../src/aws-adapter.js', {
-      './main.js': {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
         main: async (request, context) => {
           assert.deepStrictEqual(context.invocation.event, event);
           assert.deepStrictEqual(context.func, {
@@ -699,7 +700,7 @@ describe('Adapter tests for AWS', () => {
           return new Response('ok');
         },
       },
-      './aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(
       event,

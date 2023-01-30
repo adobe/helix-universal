@@ -13,14 +13,13 @@
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
 
-const assert = require('assert');
-const {
-  Resolver,
+import assert from 'assert';
+import {
   AWSResolver,
-  OpenwhiskResolver,
   GoogleResolver,
-  AzureResolver,
-} = require('../src/resolver.js');
+  OpenwhiskResolver,
+  Resolver,
+} from '../src/resolver.js';
 
 describe('Resolver Tests', () => {
   it('accepts missing headers options', async () => {
@@ -180,33 +179,6 @@ describe('AWS Resolver Tests', () => {
     assert.equal(
       resolver.createURL({ package: 'bar', name: 'foo' }).href,
       'https://abc.execute-api.us-east-1.amazonaws.com/bar/foo',
-    );
-  });
-});
-
-describe('Azure Resolver Tests', () => {
-  it('can handle single lock', async () => {
-    const resolver = new AzureResolver({}, {
-      headers: {
-        host: 'foo.com',
-        'x-ow-version-lock': 'foo=v2',
-      },
-    });
-    assert.equal(
-      resolver.createURL({ package: 'bar', name: 'foo', version: 'v1' }).href,
-      'azure:/bar/foo/v2',
-    );
-  });
-
-  it('can create url with no version', async () => {
-    const resolver = new AzureResolver({}, {
-      headers: {
-        host: 'foo.com',
-      },
-    });
-    assert.equal(
-      resolver.createURL({ package: 'bar', name: 'foo' }).href,
-      'azure:/bar/foo',
     );
   });
 });

@@ -9,14 +9,14 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const assert = require('assert');
-const crypto = require('crypto');
-const path = require('path');
-const fs = require('fs').promises;
-const util = require('util');
-const nock = require('nock');
+import assert from 'assert';
+import crypto from 'crypto';
+import path from 'path';
+import fs from 'fs/promises';
+import util from 'util';
+import nock from 'nock';
 
-async function createTestRoot() {
+export async function createTestRoot() {
   const dir = path.resolve(__dirname, 'tmp', crypto.randomBytes(16)
     .toString('hex'));
   await fs.mkdir(dir, { recursive: true });
@@ -28,7 +28,7 @@ const ANSI_REGEXP = RegExp([
   '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))',
 ].join('|'), 'g');
 
-class TestLogger {
+export class TestLogger {
   constructor() {
     this.messages = [];
   }
@@ -60,14 +60,14 @@ class TestLogger {
   }
 }
 
-function proxySecretsPlugin(plugin, emulateEnv = {}) {
+export function proxySecretsPlugin(plugin, emulateEnv = {}) {
   return function testSecretsPlugin(fn) {
     const handler = plugin(fn, { emulateEnv });
     return async (...args) => handler(...args);
   };
 }
 
-function createTestPlugin(name, invocations) {
+export function createTestPlugin(name, invocations) {
   return function testPlugin(fn) {
     return async (...args) => {
       invocations.push(`${name} before`);
@@ -78,7 +78,7 @@ function createTestPlugin(name, invocations) {
   };
 }
 
-function Nock() {
+export function Nock() {
   const scopes = {};
 
   let unmatched;
@@ -110,11 +110,3 @@ function Nock() {
   };
   return nocker;
 }
-
-module.exports = {
-  TestLogger,
-  proxySecretsPlugin,
-  createTestPlugin,
-  createTestRoot,
-  Nock,
-};

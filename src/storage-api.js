@@ -11,10 +11,8 @@
  */
 
 /* eslint-disable no-unused-vars */
-class Storage {
+export default class Storage {
   static async presignURL(bucket, path, blobParams = {}, method = 'GET', expires = 60) {
     return '';
   }
 }
-
-module.exports = Storage;

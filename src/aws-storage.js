@@ -9,11 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const Storage = require('./storage-api.js');
+import Storage from './storage-api.js';
 
 let AWS;
 
-class AWSStorage extends Storage {
+export class AWSStorage extends Storage {
   static async presignURL(bucket, path, blobParams = {}, method = 'GET', expires = 60) {
     if (!AWS) {
       // eslint-disable-next-line import/no-extraneous-dependencies
@@ -38,5 +38,3 @@ class AWSStorage extends Storage {
     return s3.getSignedUrl(operation, params);
   }
 }
-
-module.exports = AWSStorage;

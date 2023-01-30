@@ -9,12 +9,11 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
-const AbstractStorage = require('./storage-api.js');
+import AbstractStorage from './storage-api.js';
 
 let storage;
 
-class GoogleStorage extends AbstractStorage {
+export class GoogleStorage extends AbstractStorage {
   static async presignURL(bucket, path, blobParams = {}, method = 'GET', expires = 60) {
     if (!storage) {
       // eslint-disable-next-line import/no-extraneous-dependencies
@@ -40,5 +39,3 @@ class GoogleStorage extends AbstractStorage {
     return url;
   }
 }
-
-module.exports = GoogleStorage;

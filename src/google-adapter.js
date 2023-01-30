@@ -10,15 +10,18 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
-const { Request } = require('@adobe/fetch');
-const {
-  isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, cleanupHeaderValue,
-  createDefaultLogger,
-} = require('./utils.js');
-const googleSecretsPlugin = require('./google-secrets.js');
+import { Request } from '@adobe/fetch';
+import {
+  cleanupHeaderValue, createDefaultLogger,
+  ensureInvocationId,
+  ensureUTF8Charset,
+  isBinary,
+  updateProcessEnv,
+} from './utils.js';
 
-const { GoogleResolver } = require('./resolver.js');
-const { GoogleStorage } = require('./google-storage.js');
+import googleSecretsPlugin from './google-secrets.js';
+import { GoogleResolver } from './resolver.js';
+import { GoogleStorage } from './google-storage.js';
 
 /**
  * Universal adapter for google cloud functions.
@@ -69,8 +72,7 @@ async function googleAdapter(req, res) {
     };
 
     updateProcessEnv(context);
-    // eslint-disable-next-line import/no-unresolved,global-require
-    const { main } = require('./main.js');
+    const { main } = await import('./main.js');
 
     const response = await main(request, context);
     ensureUTF8Charset(response);
@@ -130,9 +132,7 @@ function wrap(adapter) {
 }
 
 // default export contains the aws secrets plugin
-const google = wrap(googleAdapter).with(googleSecretsPlugin);
+export const google = wrap(googleAdapter).with(googleSecretsPlugin);
 // export 'wrap' so it can be used like: `google.wrap(google.raw).with(epsagon).with(secrets);
 google.wrap = wrap;
 google.raw = googleAdapter;
-
-module.exports = google;

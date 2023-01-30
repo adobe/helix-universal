@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const SecretsManager = require('./aws-secretsmanager.js');
+import SecretsManager from './aws-secretsmanager.js';
 
 const CACHE_EXPIRATION = 60 * 60 * 1000; // 1 hour
 const CHECK_DELAY = 60 * 1000; // 1 minute
@@ -82,7 +82,7 @@ async function getAWSSecrets(functionName, expiration, checkDelay) {
  * @param {object} [opts.checkDelay] modification check delay in milliseconds. defaults to 1 minute.
  * @returns {function(*, *): Promise<*>}
  */
-function awsSecretsPlugin(fn, opts = {}) {
+export default function awsSecretsPlugin(fn, opts = {}) {
   return async (evt, context) => {
     const expiration = opts.expiration ?? CACHE_EXPIRATION;
     const checkDelay = opts.checkDelay || CHECK_DELAY;
@@ -101,5 +101,3 @@ function awsSecretsPlugin(fn, opts = {}) {
     return fn(evt, context);
   };
 }
-
-module.exports = awsSecretsPlugin;

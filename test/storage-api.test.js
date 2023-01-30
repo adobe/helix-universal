@@ -10,11 +10,11 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
-const assert = require('assert');
-const path = require('path');
-const AWSStorage = require('../src/aws-storage.js');
-const GoogleStorage = require('../src/google-storage.js');
-const Storage = require('../src/storage-api.js');
+import assert from 'assert';
+import path from 'path';
+import { AWSStorage } from '../src/aws-storage.js';
+import { GoogleStorage } from '../src/google-storage.js';
+import Storage from '../src/storage-api.js';
 
 describe('AWS Storage API Unit Tests', () => {
   let processEnvCopy;
@@ -54,7 +54,7 @@ describe('AWS Storage API Unit Tests', () => {
 // if this test fails, set env GOOGLE_APPLICATION_CREDENTIALS to point to a valid credential file
 describe('Google Storage API Unit Tests', () => {
   beforeEach(() => {
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = path.resolve(__dirname, 'expired-google-credentials.json');
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = path.resolve(__testdir, 'expired-google-credentials.json');
   });
 
   it('Sign URL for PUT', async () => {

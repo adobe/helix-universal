@@ -9,14 +9,14 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const { inspect } = require('util');
+import { inspect } from 'util';
 
 /**
  * Checks if the content type is binary.
  * @param {string} type - content type
  * @returns {boolean} {@code true} if content type is binary.
  */
-function isBinaryType(type) {
+export function isBinaryType(type) {
   if (!type) {
     return true;
   }
@@ -33,7 +33,7 @@ function isBinaryType(type) {
  * @param {Map} headers response headers
  * @returns {boolean} {@code true} if response is binary.
  */
-function isBinary(headers) {
+export function isBinary(headers) {
   // assume all encoding to be binary
   if (headers.get('content-encoding')) {
     return true;
@@ -48,7 +48,7 @@ function isBinary(headers) {
  * @param {Response} resp the response
  * @return {Response} the same response
  */
-function ensureUTF8Charset(resp) {
+export function ensureUTF8Charset(resp) {
   if (!resp) {
     throw Error('unexpected response: undefined');
   }
@@ -73,7 +73,7 @@ function ensureUTF8Charset(resp) {
  * @param {UniversalContext} context the context
  * @return {Response} the same response
  */
-function ensureInvocationId(resp, context) {
+export function ensureInvocationId(resp, context) {
   if (!resp.headers.has('x-invocation-id')) {
     resp.headers.set('x-invocation-id', context.invocation.id);
   }
@@ -85,7 +85,7 @@ function ensureInvocationId(resp, context) {
  * (note that we don't set the invocation id, since not all runtimes isolate the process env)
  * @param {UniversalContext} context The context
  */
-function updateProcessEnv(context) {
+export function updateProcessEnv(context) {
   process.env.HELIX_UNIVERSAL_RUNTIME = context.runtime.name;
   process.env.HELIX_UNIVERSAL_NAME = context.func.name;
   process.env.HELIX_UNIVERSAL_PACKAGE = context.func.package;
@@ -98,17 +98,17 @@ function updateProcessEnv(context) {
  * @param {string} value a header value
  * @returns a valid header value
  */
-function cleanupHeaderValue(value) {
+export function cleanupHeaderValue(value) {
   return value.replace(/[^\t\u0020-\u007E\u0080-\u00FF]/g, '').substr(0, 1024);
 }
 
-const HEALTHCHECK_PATH = '/_status_check/healthcheck.json';
+export const HEALTHCHECK_PATH = '/_status_check/healthcheck.json';
 
 /**
  * Creates a default helix-log compatible console logger.
  * @returns {Logger}
  */
-function createDefaultLogger() {
+export function createDefaultLogger() {
   const log = {};
   ['log', 'silly:debug', 'trace:debug', 'debug', 'verbose:debug', 'info', 'warn', 'error', 'fatal:error']
     .forEach((m) => {
@@ -118,17 +118,6 @@ function createDefaultLogger() {
     });
   return log;
 }
-
-module.exports = {
-  isBinary,
-  isBinaryType,
-  ensureUTF8Charset,
-  ensureInvocationId,
-  updateProcessEnv,
-  cleanupHeaderValue,
-  createDefaultLogger,
-  HEALTHCHECK_PATH,
-};
 
 /**
  * content types that openwhisk treats as text

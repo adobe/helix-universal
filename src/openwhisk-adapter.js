@@ -10,14 +10,18 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
-const querystring = require('querystring');
-const { Request } = require('@adobe/fetch');
-const {
-  isBinary, isBinaryType, ensureUTF8Charset, ensureInvocationId, updateProcessEnv,
+import querystring from 'querystring';
+import { Request } from '@adobe/fetch';
+import {
   cleanupHeaderValue, createDefaultLogger,
-} = require('./utils.js');
+  ensureInvocationId,
+  ensureUTF8Charset,
+  isBinary,
+  isBinaryType,
+  updateProcessEnv,
+} from './utils.js';
 
-const { OpenwhiskResolver } = require('./resolver.js');
+import { OpenwhiskResolver } from './resolver.js';
 
 /**
  * The universal adapter for openwhisk actions.
@@ -105,8 +109,7 @@ async function openwhiskAdapter(params) {
   };
 
   updateProcessEnv(context);
-  // eslint-disable-next-line import/no-unresolved,global-require
-  const { main } = require('./main.js');
+  const { main } = await import('./main.js');
 
   const response = await main(request, context);
   ensureUTF8Charset(response);
@@ -174,9 +177,7 @@ function wrap(adapter) {
 }
 
 // default export contains the aws secrets plugin
-const openwhisk = wrap(openwhiskAdapter);
+export const openwhisk = wrap(openwhiskAdapter);
 // export 'wrap' so it can be used like: `openwhisk.wrap(openwhisk.raw).with(epsagon).with(secrets);
 openwhisk.wrap = wrap;
 openwhisk.raw = openwhiskAdapter;
-
-module.exports = openwhisk;

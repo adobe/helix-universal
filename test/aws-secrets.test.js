@@ -10,20 +10,15 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
-const assert = require('assert');
-const { Nock } = require('./utils.js');
-const awsSecretsPlugin = require('../src/aws-secrets.js');
+import assert from 'assert';
+import { Nock } from './utils.js';
+import awsSecretsPlugin from '../src/aws-secrets.js';
 
 describe('Secrets tests for AWS', () => {
   let processEnvCopy;
   let nock;
 
   beforeEach(() => {
-    // clean require cache so that aws-sdk is loaded again and resets any internal cache
-    Object.keys(require.cache).forEach((key) => {
-      delete require.cache[key];
-    });
-
     processEnvCopy = { ...process.env };
     process.env.AWS_REGION = 'us-east-1';
     process.env.AWS_ACCESS_KEY_ID = 'fake';
