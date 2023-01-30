@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-universal",
-  "version": "3.3.3",
+  "version": "3.3.4",
   "description": "Helix Universal",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -31,25 +31,24 @@
   },
   "homepage": "https://github.com/adobe/helix-universal#readme",
   "dependencies": {
-    "@adobe/fetch": "4.0.0",
-    "aws4": "1.12.0",
-    "mocha-multi-reporters": "^1.5.1"
+    "@adobe/fetch": "4.0.1",
+    "aws4": "1.12.0"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.1",
     "@google-cloud/secret-manager": "4.2.0",
-    "@google-cloud/storage": "6.9.0",
+    "@google-cloud/storage": "6.9.1",
     "@semantic-release/changelog": "6.0.2",
     "@semantic-release/git": "10.0.1",
-    "aws-sdk": "2.1299.0",
+    "aws-sdk": "2.1304.0",
     "c8": "7.12.0",
     "eslint": "8.32.0",
     "esmock": "2.1.0",
     "husky": "8.0.3",
-    "jsdoc-to-markdown": "8.0.0",
     "junit-report-builder": "3.0.1",
     "lint-staged": "13.1.0",
     "mocha": "10.2.0",
+    "mocha-multi-reporters": "^1.5.1",
     "nock": "13.3.0",
     "semantic-release": "19.0.5"
   },

@@ -16,10 +16,6 @@
 $ npm install @adobe/helix-universal
 ```
 
-## Usage
-
-See the [API documentation](docs/API.md).
-
 ## Development
 
 ### Build
