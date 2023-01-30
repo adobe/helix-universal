@@ -11,6 +11,7 @@
  */
 /**
  * dummy function to make esmock/eslint happy.
+ * this file is excluded in npm package.
  */
 /* c8 ignore next 2 */
 export default function main() {
