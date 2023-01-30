@@ -12,7 +12,8 @@
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
 import { Request } from '@adobe/fetch';
 import {
-  cleanupHeaderValue, createDefaultLogger,
+  cleanupHeaderValue,
+  createDefaultLogger,
   ensureInvocationId,
   ensureUTF8Charset,
   isBinary,
@@ -66,139 +67,154 @@ function splitHeaders(raw) {
 }
 
 /**
- * The raw universal adapter for lambda functions
- * @param {object} event AWS Lambda event
- * @param {object} context AWS Lambda context
- * @returns {*} lambda response
+ * Creates a universal adapter for google cloud functions.
+ * @param {function} opts.factory the factory for the main function. defaults to dynamic import
+ * @param {object} opts options
  */
-async function lambdaAdapter(event, context) {
-  const nonHttp = (!event.requestContext);
+export function createAdapter(opts = {}) {
+  let { factory } = opts;
+  if (!factory) {
+    factory = async () => (await import('./main.js')).main;
+  }
 
-  try {
-    // add cookie header if missing
-    const { headers = {} } = event;
-    if (!headers.cookie && event.cookies) {
-      headers.cookie = event.cookies.join(';');
-    }
+  /**
+   * The raw universal adapter for lambda functions
+   * @param {object} event AWS Lambda event
+   * @param {object} context AWS Lambda context
+   * @returns {*} lambda response
+   */
+  return async function lambdaAdapter(event, context) {
+    const nonHttp = (!event.requestContext);
 
-    const host = event.requestContext?.domainName;
-    const path = event.rawPath ?? '';
-    const queryString = nonHttp ? eventToQueryString(event) : event.rawQueryString || '';
-
-    const request = new Request(`https://${host}${path}${queryString ? '?' : ''}${queryString}`, {
-      method: event.requestContext?.http?.method,
-      headers,
-      body: event.isBase64Encoded ? Buffer.from(event.body, 'base64') : event.body,
-    });
-
-    // parse ARN
-    //   arn:partition:service:region:account-id:resource-type:resource-id
-    //   eg: arn:aws:lambda:us-east-1:118435662149:function:dump:4_2_1
-    const [/* 'arn' */, /* 'aws' */, /* 'lambda' */,
-      region,
-      accountId, /* 'function' */,
-      functionName,
-      functionAlias = '$LATEST',
-    ] = context.invokedFunctionArn.split(':');
-    const [packageName, name] = functionName.split('--');
-
-    const con = {
-      resolver: new AWSResolver(event),
-      pathInfo: {
-        suffix: event.pathParameters?.path ? `/${event.pathParameters.path}` : '',
-      },
-      runtime: {
-        name: 'aws-lambda',
-        region,
-        accountId,
-      },
-      func: {
-        name,
-        package: packageName,
-        version: functionAlias.replace(/_/g, '.'),
-        fqn: context.invokedFunctionArn,
-        app: event.requestContext?.apiId ?? `aws-${accountId}`,
-      },
-      invocation: {
-        id: context.awsRequestId,
-        deadline: Date.now() + context.getRemainingTimeInMillis(),
-        transactionId: request.headers.get('x-transaction-id') || request.headers.get('x-amzn-trace-id'),
-        requestId: event.requestContext?.requestId,
-        event,
-      },
-      env: {
-        ...process.env,
-      },
-      storage: AWSStorage,
-      log: createDefaultLogger(),
-    };
-
-    // support for Amazon SQS, remember records passed by trigger
-    if (event.Records) {
-      con.records = event.Records;
-    }
-
-    updateProcessEnv(con);
-    const { main } = await import('./main.js');
-
-    const response = await main(request, con);
-    ensureUTF8Charset(response);
-    ensureInvocationId(response, con);
-
-    // flush log if present
-    if (con.log && con.log.flush) {
-      await con.log.flush();
-    }
-
-    if (nonHttp) {
-      // directly return response body
-      if (response.headers.get('content-type') === 'application/json') {
-        return await response.json();
+    try {
+      // add cookie header if missing
+      const { headers = {} } = event;
+      if (!headers.cookie && event.cookies) {
+        headers.cookie = event.cookies.join(';');
       }
-      return await response.text();
-    }
 
-    const isBase64Encoded = isBinary(response.headers);
-    const body = isBase64Encoded ? Buffer.from(await response.arrayBuffer()).toString('base64') : await response.text();
+      const host = event.requestContext?.domainName;
+      const path = event.rawPath ?? '';
+      const queryString = nonHttp ? eventToQueryString(event) : event.rawQueryString || '';
 
-    return {
-      statusCode: response.status,
-      ...splitHeaders(response.headers.raw()),
-      isBase64Encoded,
-      body,
-    };
-  } catch (e) {
-    if (e instanceof TypeError && e.code === 'ERR_INVALID_CHAR') {
-      // eslint-disable-next-line no-console
-      console.error('invalid request header', e.message);
+      const request = new Request(`https://${host}${path}${queryString ? '?' : ''}${queryString}`, {
+        method: event.requestContext?.http?.method,
+        headers,
+        body: event.isBase64Encoded ? Buffer.from(event.body, 'base64') : event.body,
+      });
+
+      // parse ARN
+      //   arn:partition:service:region:account-id:resource-type:resource-id
+      //   eg: arn:aws:lambda:us-east-1:118435662149:function:dump:4_2_1
+      const [/* 'arn' */, /* 'aws' */, /* 'lambda' */,
+        region,
+        accountId, /* 'function' */,
+        functionName,
+        functionAlias = '$LATEST',
+      ] = context.invokedFunctionArn.split(':');
+      const [packageName, name] = functionName.split('--');
+
+      const con = {
+        resolver: new AWSResolver(event),
+        pathInfo: {
+          suffix: event.pathParameters?.path ? `/${event.pathParameters.path}` : '',
+        },
+        runtime: {
+          name: 'aws-lambda',
+          region,
+          accountId,
+        },
+        func: {
+          name,
+          package: packageName,
+          version: functionAlias.replace(/_/g, '.'),
+          fqn: context.invokedFunctionArn,
+          app: event.requestContext?.apiId ?? `aws-${accountId}`,
+        },
+        invocation: {
+          id: context.awsRequestId,
+          deadline: Date.now() + context.getRemainingTimeInMillis(),
+          transactionId: request.headers.get('x-transaction-id') || request.headers.get('x-amzn-trace-id'),
+          requestId: event.requestContext?.requestId,
+          event,
+        },
+        env: {
+          ...process.env,
+        },
+        storage: AWSStorage,
+        log: createDefaultLogger(),
+      };
+
+      // support for Amazon SQS, remember records passed by trigger
+      if (event.Records) {
+        con.records = event.Records;
+      }
+
+      updateProcessEnv(con);
+      // create the `main` after the process.env is set. this gives the functions the ability to
+      // use process.env in their global scopes.
+      const main = await factory();
+
+      const response = await main(request, con);
+      ensureUTF8Charset(response);
+      ensureInvocationId(response, con);
+
+      // flush log if present
+      if (con.log && con.log.flush) {
+        await con.log.flush();
+      }
+
+      if (nonHttp) {
+        // directly return response body
+        if (response.headers.get('content-type') === 'application/json') {
+          return await response.json();
+        }
+        return await response.text();
+      }
+
+      const isBase64Encoded = isBinary(response.headers);
+      const body = isBase64Encoded ? Buffer.from(await response.arrayBuffer())
+        .toString('base64') : await response.text();
+
       return {
-        statusCode: 400,
+        statusCode: response.status,
+        ...splitHeaders(response.headers.raw()),
+        isBase64Encoded,
+        body,
+      };
+    } catch (e) {
+      if (e instanceof TypeError && e.code === 'ERR_INVALID_CHAR') {
+        // eslint-disable-next-line no-console
+        console.error('invalid request header', e.message);
+        return {
+          statusCode: 400,
+          headers: {
+            'content-type': 'text/plain',
+            'x-invocation-id': context.awsRequestId,
+          },
+          body: e.message,
+        };
+      }
+      // eslint-disable-next-line no-console
+      console.error('error while invoking function', e);
+      if (nonHttp) {
+        // let caller see the exception thrown
+        throw e;
+      }
+      return {
+        statusCode: 500,
         headers: {
           'content-type': 'text/plain',
+          'x-error': cleanupHeaderValue(e.message),
           'x-invocation-id': context.awsRequestId,
         },
         body: e.message,
       };
     }
-    // eslint-disable-next-line no-console
-    console.error('error while invoking function', e);
-    if (nonHttp) {
-      // let caller see the exception thrown
-      throw e;
-    }
-    return {
-      statusCode: 500,
-      headers: {
-        'content-type': 'text/plain',
-        'x-error': cleanupHeaderValue(e.message),
-        'x-invocation-id': context.awsRequestId,
-      },
-      body: e.message,
-    };
-  }
+  };
 }
 
-function wrap(adapter) {
+export function wrap(adapter) {
   const wrapped = async (evt, ctx) => {
     try {
       // intentional await to catch errors
@@ -230,7 +246,4 @@ function wrap(adapter) {
 }
 
 // default export contains the aws secrets plugin
-export const lambda = wrap(lambdaAdapter).with(awsSecretsPlugin);
-// export 'wrap' so it can be used like: `lambda.wrap(lambda.raw).with(epsagon).with(secrets);
-lambda.wrap = wrap;
-lambda.raw = lambdaAdapter;
+export const lambda = wrap(createAdapter()).with(awsSecretsPlugin);
