@@ -9,10 +9,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const aws4 = require('aws4');
-const { h1, context } = require('@adobe/fetch');
+import aws4 from 'aws4';
+import { context, h1 } from '@adobe/fetch';
 
-/* istanbul ignore next 7 */
+/* c8 ignore next 7 */
 const fetchContext = process.env.HELIX_FETCH_FORCE_HTTP1
   ? h1({
     userAgent: 'adobe-fetch', // static user-agent for recorded tests
@@ -24,7 +24,7 @@ const fetchContext = process.env.HELIX_FETCH_FORCE_HTTP1
 /**
  * Secrets Manager class.
  */
-class SecretsManager {
+export default class SecretsManager {
   constructor(opts) {
     const {
       AWS_REGION: region,
@@ -110,5 +110,3 @@ class SecretsManager {
     return this._request('GetSecretValue', { SecretId: secretId });
   }
 }
-
-module.exports = SecretsManager;

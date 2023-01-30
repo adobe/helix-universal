@@ -12,10 +12,10 @@
 
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
-const assert = require('assert');
-const proxyquire = require('proxyquire').noCallThru();
-const { Response } = require('@adobe/fetch');
-const { createTestPlugin } = require('./utils.js');
+import assert from 'assert';
+import esmock from 'esmock';
+import { Response } from '@adobe/fetch';
+import { createTestPlugin } from './utils.js';
 
 describe('OpenWhisk Adapter Test', () => {
   let processEnvCopy;
@@ -35,8 +35,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('set correct context and environment', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: (req, context) => {
           const ret = JSON.stringify({
             func: context.func,
@@ -83,8 +83,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('Adapts with empty params', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: () => new Response(),
 
       },
@@ -102,8 +102,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('Propagates query', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: (req) => {
           const ret = JSON.stringify({
             url: req.url,
@@ -131,8 +131,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('Propagates query and params and populates env', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: (req, context) => {
           const ret = JSON.stringify({
             url: req.url,
@@ -164,8 +164,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('Respects path, headers and method', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: (req, context) => {
           const ret = JSON.stringify({
             url: req.url,
@@ -209,8 +209,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('populates body', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: async (req) => {
           const ret = JSON.stringify({
             body: await req.text(),
@@ -244,8 +244,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('populates binary body', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: async (req) => {
           const ret = JSON.stringify({
             body: await req.text(),
@@ -280,8 +280,8 @@ describe('OpenWhisk Adapter Test', () => {
 
   it('uses localhost if no env var', async () => {
     delete process.env.__OW_API_HOST;
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: (req) => {
           const ret = JSON.stringify({
             url: req.url,
@@ -307,8 +307,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('respects x-forwarded-host', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: (req) => {
           const ret = JSON.stringify({
             url: req.url,
@@ -338,8 +338,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('responds with 500 on error', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: () => {
           throw Error('boing!');
         },
@@ -364,8 +364,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('text request body is decoded', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
           assert.strictEqual(await request.text(), 'hallo text');
@@ -388,8 +388,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('json request body is decoded', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async (request, context) => {
           assert.deepStrictEqual(await request.json(), { goo: 'haha' });
@@ -412,8 +412,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('handles illegal request headers with 400', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: () => new Response('ok'),
 
       },
@@ -429,8 +429,8 @@ describe('OpenWhisk Adapter Test', () => {
   });
 
   it('handle binary response body', async () => {
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async () => new Response(Buffer.from('okay', 'utf-8'), {
           headers: {
@@ -450,8 +450,8 @@ describe('OpenWhisk Adapter Test', () => {
 
   it('default can wrap more plugins', async () => {
     const invocations = [];
-    const main = proxyquire('../src/openwhisk-adapter.js', {
-      './main.js': {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
         main: () => {
           invocations.push('main');
           return new Response('ok');

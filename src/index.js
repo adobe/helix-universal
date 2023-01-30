@@ -10,13 +10,13 @@
  * governing permissions and limitations under the License.
  */
 
-const aws = require('./aws-adapter.js');
-const awsSecretsPlugin = require('./aws-secrets.js');
-const googleSecretsPlugin = require('./google-secrets.js');
-const openwhisk = require('./openwhisk-adapter.js');
-const google = require('./google-adapter.js');
+import { lambda as aws } from './aws-adapter.js';
+import awsSecretsPlugin from './aws-secrets.js';
+import googleSecretsPlugin from './google-secrets.js';
+import { openwhisk } from './openwhisk-adapter.js';
+import { google } from './google-adapter.js';
 
-module.exports = {
+export default {
   adapter: {
     openwhisk,
     aws,

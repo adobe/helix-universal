@@ -10,14 +10,18 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-disable no-param-reassign, no-underscore-dangle, import/no-extraneous-dependencies */
-const { Request } = require('@adobe/fetch');
-const {
-  isBinary, ensureUTF8Charset, ensureInvocationId, updateProcessEnv, cleanupHeaderValue,
-  createDefaultLogger,
-} = require('./utils.js');
-const awsSecretsPlugin = require('./aws-secrets.js');
-const { AWSResolver } = require('./resolver.js');
-const { AWSStorage } = require('./aws-storage.js');
+import { Request } from '@adobe/fetch';
+import {
+  cleanupHeaderValue, createDefaultLogger,
+  ensureInvocationId,
+  ensureUTF8Charset,
+  isBinary,
+  updateProcessEnv,
+} from './utils.js';
+
+import awsSecretsPlugin from './aws-secrets.js';
+import { AWSResolver } from './resolver.js';
+import { AWSStorage } from './aws-storage.js';
 
 /**
  * Given an event, builds a query string out of the string-valued properties of
@@ -135,8 +139,7 @@ async function lambdaAdapter(event, context) {
     }
 
     updateProcessEnv(con);
-    // eslint-disable-next-line import/no-unresolved,global-require
-    const { main } = require('./main.js');
+    const { main } = await import('./main.js');
 
     const response = await main(request, con);
     ensureUTF8Charset(response);
@@ -227,9 +230,7 @@ function wrap(adapter) {
 }
 
 // default export contains the aws secrets plugin
-const lambda = wrap(lambdaAdapter).with(awsSecretsPlugin);
+export const lambda = wrap(lambdaAdapter).with(awsSecretsPlugin);
 // export 'wrap' so it can be used like: `lambda.wrap(lambda.raw).with(epsagon).with(secrets);
 lambda.wrap = wrap;
 lambda.raw = lambdaAdapter;
-
-module.exports = lambda;

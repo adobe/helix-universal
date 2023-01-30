@@ -32,7 +32,7 @@ async function getGoogleSecrets(req) {
       name,
     });
 
-    /* istanbul ignore next */
+    /* c8 ignore next */
     return JSON.parse(version.payload.data.toString());
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -49,7 +49,7 @@ async function getGoogleSecrets(req) {
  *                                   properties instead (used for testing)
  * @returns {function(*, *): Promise<*>}
  */
-function googleSecretsPlugin(fn, opts = {}) {
+export default function googleSecretsPlugin(fn, opts = {}) {
   return async (req, res) => {
     const secrets = opts.emulateEnv ?? await getGoogleSecrets(req);
     // set secrets not present on process.env
@@ -61,5 +61,3 @@ function googleSecretsPlugin(fn, opts = {}) {
     return fn(req, res);
   };
 }
-
-module.exports = googleSecretsPlugin;

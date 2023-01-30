@@ -10,11 +10,11 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env mocha */
-const { Response } = require('@adobe/fetch');
-const assert = require('assert');
-const proxyquire = require('proxyquire').noCallThru();
-const { proxySecretsPlugin, createTestPlugin } = require('./utils.js');
-const googleSecretsPlugin = require('../src/google-secrets.js');
+import { Response } from '@adobe/fetch';
+import assert from 'assert';
+import esmock from 'esmock';
+import googleSecretsPlugin from '../src/google-secrets.js';
+import { createTestPlugin, proxySecretsPlugin } from './utils.js';
 
 function createMockResponse() {
   return {
@@ -59,11 +59,11 @@ describe('Adapter tests for Google', () => {
   it('handles illegal request headers with 400', async () => {
     process.env.K_SERVICE = 'helix-services--content-proxy';
     process.env.K_REVISION = '4.3.1';
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         main: () => new Response('ok'),
       },
-      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
+      '../src/google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
 
     });
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
@@ -78,15 +78,15 @@ describe('Adapter tests for Google', () => {
   it('context.pathInfo.suffix', async () => {
     process.env.K_SERVICE = 'helix-services--content-proxy';
     process.env.K_REVISION = '4.3.1';
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => {
           assert.strictEqual(context.pathInfo.suffix, '/foo/bar');
           assert.ok(request);
           return new Response('okay');
         },
       },
-      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
+      '../src/google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
     });
 
     const req = createMockRequest('/helix-services--content-proxy_4.3.1/foo/bar', {
@@ -106,11 +106,11 @@ describe('Adapter tests for Google', () => {
     process.env.K_SERVICE = 'helix-services--content-proxy';
     process.env.K_REVISION = '4.3.1';
     process.env.GOOGLE_TEST_PARAM = '123';
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
-      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin, {
+      '../src/google-secrets.js': proxySecretsPlugin(googleSecretsPlugin, {
         SOME_SECRET: 'pssst',
         GOOGLE_TEST_PARAM: 'abc',
       }),
@@ -136,11 +136,11 @@ describe('Adapter tests for Google', () => {
   it('raw adapter doesnt call package params', async () => {
     process.env.K_SERVICE = 'helix-services--content-proxy';
     process.env.K_REVISION = '4.3.1';
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
-      './google-secrets.js': () => async () => {
+      '../src/google-secrets.js': () => async () => {
         throw new Error('plugin kaput');
       },
     });
@@ -161,11 +161,11 @@ describe('Adapter tests for Google', () => {
   });
 
   it('adapter catches error in secrets fetching', async () => {
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => new Response(JSON.stringify(context.env)),
       },
-      './google-secrets.js': () => async () => {
+      '../src/google-secrets.js': () => async () => {
         throw new Error('something went wrong');
       },
     });
@@ -183,8 +183,8 @@ describe('Adapter tests for Google', () => {
   it('invokes function', async () => {
     process.env.K_SERVICE = 'simple-package--simple-name';
     process.env.K_REVISION = '1.45.0';
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => {
           assert.deepStrictEqual(context.func, {
             name: 'simple-name',
@@ -196,7 +196,7 @@ describe('Adapter tests for Google', () => {
           return new Response('ok');
         },
       },
-      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
+      '../src/google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
     });
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
       host: 'us-central1-helix-225321.cloudfunctions.net',
@@ -209,8 +209,8 @@ describe('Adapter tests for Google', () => {
   it('context.invocation', async () => {
     process.env.K_SERVICE = 'simple-package--simple-name';
     process.env.K_REVISION = '1.45.0';
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         main: (request, context) => {
           delete context.invocation.deadline;
           assert.deepStrictEqual(context.invocation, {
@@ -221,7 +221,7 @@ describe('Adapter tests for Google', () => {
           return new Response('ok');
         },
       },
-      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
+      '../src/google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
     });
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
       host: 'us-central1-helix-225321.cloudfunctions.net',
@@ -237,13 +237,13 @@ describe('Adapter tests for Google', () => {
   it('handles error in function', async () => {
     process.env.K_SERVICE = 'simple-package--simple-name';
     process.env.K_REVISION = '1.45.0';
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         main: () => {
           throw new Error('function kaput');
         },
       },
-      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
+      '../src/google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
     });
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
       host: 'us-central1-helix-225321.cloudfunctions.net',
@@ -262,8 +262,8 @@ describe('Adapter tests for Google', () => {
   it('handle binary response body', async () => {
     process.env.K_SERVICE = 'simple-package--simple-name';
     process.env.K_REVISION = '1.45.0';
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         // eslint-disable-next-line no-unused-vars
         main: async () => new Response(Buffer.from('okay', 'utf-8'), {
           headers: {
@@ -271,7 +271,7 @@ describe('Adapter tests for Google', () => {
           },
         }),
       },
-      './google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
+      '../src/google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
     });
 
     const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
@@ -289,14 +289,14 @@ describe('Adapter tests for Google', () => {
     const invocations = [];
     process.env.K_SERVICE = 'simple-package--simple-name';
     process.env.K_REVISION = '1.45.0';
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         main: () => {
           invocations.push('main');
           return new Response('ok');
         },
       },
-      './google-secrets.js': createTestPlugin('secrets', invocations),
+      '../src/google-secrets.js': createTestPlugin('secrets', invocations),
     });
     const handler = google
       .with(createTestPlugin('plugin0', invocations))
@@ -323,8 +323,8 @@ describe('Adapter tests for Google', () => {
     const invocations = [];
     process.env.K_SERVICE = 'simple-package--simple-name';
     process.env.K_REVISION = '1.45.0';
-    const google = proxyquire('../src/google-adapter.js', {
-      './main.js': {
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
         main: () => {
           invocations.push('main');
           return new Response('ok');

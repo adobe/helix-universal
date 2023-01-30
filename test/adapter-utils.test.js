@@ -12,10 +12,9 @@
 
 /* eslint-env mocha */
 /* eslint-disable no-underscore-dangle */
-
-const assert = require('assert');
-const { Response } = require('@adobe/fetch');
-const { isBinary, ensureUTF8Charset, ensureInvocationId } = require('../src/utils.js');
+import assert from 'assert';
+import { Response } from '@adobe/fetch';
+import { ensureInvocationId, ensureUTF8Charset, isBinary } from '../src/utils.js';
 
 describe('Adapter Utils Tests: ensureUTF8Encoding', () => {
   it('defaults missing charset-type header to text/plain', async () => {
