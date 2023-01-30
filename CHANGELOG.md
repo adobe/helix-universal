@@ -1,3 +1,18 @@
+# [4.0.0](https://github.com/adobe/helix-universal/compare/v3.3.4...v4.0.0) (2023-01-30)
+
+
+### Bug Fixes
+
+* use ESM  ([b9a5d73](https://github.com/adobe/helix-universal/commit/b9a5d735f8cbb89c71a6f3e325f07cd72e0b5d88))
+
+
+### BREAKING CHANGES
+
+* requires ESM
+
+* fix(deps): update dependency @adobe/fetch to v4
+* fix: use ESM
+
 ## [3.3.4](https://github.com/adobe/helix-universal/compare/v3.3.3...v3.3.4) (2023-01-28)
 
 
