@@ -196,3 +196,6 @@ export function wrap(adapter) {
 }
 
 export const openwhisk = wrap(createAdapter());
+
+// create raw adapter for easier testing
+openwhisk.raw = createAdapter();
