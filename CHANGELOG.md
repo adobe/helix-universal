@@ -1,3 +1,10 @@
+## [4.1.1](https://github.com/adobe/helix-universal/compare/v4.1.0...v4.1.1) (2023-01-31)
+
+
+### Bug Fixes
+
+* fix exports ([#202](https://github.com/adobe/helix-universal/issues/202)) ([5b369c0](https://github.com/adobe/helix-universal/commit/5b369c0f85d134fbcb7d546c46882ec15bd287d0))
+
 # [4.1.0](https://github.com/adobe/helix-universal/compare/v4.0.0...v4.1.0) (2023-01-31)
 
 
