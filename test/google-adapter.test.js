@@ -136,21 +136,21 @@ describe('Adapter tests for Google', () => {
   it('raw adapter doesnt call package params', async () => {
     process.env.K_SERVICE = 'helix-services--content-proxy';
     process.env.K_REVISION = '4.3.1';
-    const { google } = await esmock.p('../src/google-adapter.js', {
-      '../src/main.js': {
-        main: (request, context) => new Response(JSON.stringify(context.env)),
-      },
+
+    const main = (request, context) => new Response(JSON.stringify(context.env));
+    const { createAdapter } = await esmock.p('../src/google-adapter.js', {
       '../src/google-secrets.js': () => async () => {
         throw new Error('plugin kaput');
       },
     });
+    const google = createAdapter({ factory: () => main });
 
     const req = createMockRequest('/helix-services--content-proxy_4.3.1/foo/bar', {
       host: 'us-central1-helix-225321.cloudfunctions.net',
       'function-execution-id': '1234',
     });
     const res = createMockResponse();
-    await google.raw(req, res);
+    await google(req, res);
     assert.strictEqual(res.code, 200);
     const body = JSON.parse(res.body);
     Object.keys(processEnvCopy).forEach((key) => delete body[key]);
@@ -323,15 +323,15 @@ describe('Adapter tests for Google', () => {
     const invocations = [];
     process.env.K_SERVICE = 'simple-package--simple-name';
     process.env.K_REVISION = '1.45.0';
-    const { google } = await esmock.p('../src/google-adapter.js', {
-      '../src/main.js': {
-        main: () => {
-          invocations.push('main');
-          return new Response('ok');
-        },
-      },
-    });
-    const handler = google.wrap(google.raw)
+
+    const main = () => {
+      invocations.push('main');
+      return new Response('ok');
+    };
+
+    const { createAdapter, wrap } = await esmock('../src/google-adapter.js');
+    const google = createAdapter({ factory: () => main });
+    const handler = wrap(google)
       .with(createTestPlugin('plugin0', invocations))
       .with(createTestPlugin('plugin1', invocations));
 

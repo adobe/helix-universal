@@ -98,22 +98,21 @@ describe('Adapter tests for AWS', () => {
     assert.strictEqual(res.statusCode, 200);
   });
 
-  it('can invoke the raw handler', async () => {
-    const { lambda } = await esmock.p('../src/aws-adapter.js', {
-      '../src/main.js': {
-        main: (request, context) => {
-          assert.deepStrictEqual(context.func, {
-            name: 'dump',
-            package: 'helix-pages',
-            version: '4.3.1',
-            fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
-            app: 'kvvyh7ikcb',
-          });
-          return new Response('ok');
-        },
-      },
-    });
-    const res = await lambda.raw(DEFAULT_EVENT, DEFAULT_CONTEXT);
+  it('can use the adapter factory', async () => {
+    const main = (request, context) => {
+      assert.deepStrictEqual(context.func, {
+        name: 'dump',
+        package: 'helix-pages',
+        version: '4.3.1',
+        fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
+        app: 'kvvyh7ikcb',
+      });
+      return new Response('ok');
+    };
+
+    const { createAdapter } = await esmock.p('../src/aws-adapter.js');
+    const lambda = createAdapter({ factory: () => main });
+    const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
     assert.strictEqual(res.statusCode, 200);
   });
 
@@ -147,16 +146,14 @@ describe('Adapter tests for AWS', () => {
 
   it('default can wrap raw adapter plugins', async () => {
     const invocations = [];
-    const { lambda } = await esmock.p('../src/aws-adapter.js', {
-      '../src/main.js': {
-        main: () => {
-          invocations.push('main');
-          return new Response('ok');
-        },
-      },
-    });
-    const handler = lambda
-      .wrap(lambda.raw)
+    const main = () => {
+      invocations.push('main');
+      return new Response('ok');
+    };
+
+    const { createAdapter, wrap } = await esmock.p('../src/aws-adapter.js');
+    const lambda = createAdapter({ factory: () => main });
+    const handler = wrap(lambda)
       .with(createTestPlugin('plugin0', invocations))
       .with(createTestPlugin('plugin1', invocations));
 
@@ -172,21 +169,19 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('when run with no version in functionArn use $LATEST', async () => {
-    const { lambda } = await esmock.p('../src/aws-adapter.js', {
-      '../src/main.js': {
-        main: (request, context) => {
-          assert.deepStrictEqual(context.func, {
-            name: 'dump',
-            package: 'helix-pages',
-            version: '$LATEST',
-            fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump',
-            app: 'kvvyh7ikcb',
-          });
-          return new Response('ok');
-        },
-      },
-      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
-    });
+    function main(request, context) {
+      assert.deepStrictEqual(context.func, {
+        name: 'dump',
+        package: 'helix-pages',
+        version: '$LATEST',
+        fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump',
+        app: 'kvvyh7ikcb',
+      });
+      return new Response('ok');
+    }
+
+    const { createAdapter } = await esmock('../src/aws-adapter.js');
+    const lambda = createAdapter({ factory: () => main });
     const res = await lambda(DEFAULT_EVENT, {
       ...DEFAULT_CONTEXT,
       invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump',
@@ -216,16 +211,15 @@ describe('Adapter tests for AWS', () => {
   });
 
   it('raw adapter doesnt call package params', async () => {
-    const { lambda } = await esmock.p('../src/aws-adapter.js', {
-      '../src/main.js': {
-        main: (request, context) => new Response(JSON.stringify(context.env)),
-      },
+    const main = (request, context) => new Response(JSON.stringify(context.env));
+    const { createAdapter } = await esmock.p('../src/aws-adapter.js', {
       '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin, {
         SOME_SECRET: 'pssst',
         AWS_TEST_PARAM: 'abc',
       }),
     });
-    const res = await lambda.raw(DEFAULT_EVENT, DEFAULT_CONTEXT);
+    const lambda = createAdapter({ factory: () => main });
+    const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
     assert.strictEqual(res.statusCode, 200);
     const body = JSON.parse(res.body);
     Object.keys(processEnvCopy).forEach((key) => delete body[key]);

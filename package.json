@@ -5,6 +5,12 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./google": "./src/google-adapter.js",
+    "./aws": "./src/aws-adapter.js",
+    "./openwhisk": "./src/openwhisk-adapter.js"
+  },
   "scripts": {
     "test": "c8 mocha --spec=test/**/*.test.js",
     "lint": "eslint .",
