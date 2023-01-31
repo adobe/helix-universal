@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/adobe/helix-universal/compare/v4.0.0...v4.1.0) (2023-01-31)
+
+
+### Features
+
+* support factory for main function ([#201](https://github.com/adobe/helix-universal/issues/201)) ([c09a8af](https://github.com/adobe/helix-universal/commit/c09a8af59779831dfdd49f76c99f2f28fa9a7850))
+
 # [4.0.0](https://github.com/adobe/helix-universal/compare/v3.3.4...v4.0.0) (2023-01-30)
 
 
