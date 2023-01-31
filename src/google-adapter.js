@@ -148,3 +148,6 @@ export function wrap(adapter) {
 
 // default export contains the aws secrets plugin
 export const google = wrap(createAdapter()).with(googleSecretsPlugin);
+
+// create raw adapter for easier testing
+google.raw = createAdapter();

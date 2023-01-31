@@ -10,18 +10,15 @@
  * governing permissions and limitations under the License.
  */
 
-import { lambda as aws } from './aws-adapter.js';
-import awsSecretsPlugin from './aws-secrets.js';
-import googleSecretsPlugin from './google-secrets.js';
+import { lambda } from './aws-adapter.js';
 import { openwhisk } from './openwhisk-adapter.js';
 import { google } from './google-adapter.js';
 
-export default {
-  adapter: {
-    openwhisk,
-    aws,
-    google,
-  },
-  awsSecretsPlugin,
-  googleSecretsPlugin,
+export { default as awsSecretsPlugin } from './aws-secrets.js';
+export { default as googleSecretsPlugin } from './google-secrets.js';
+
+export const adapter = {
+  openwhisk,
+  lambda,
+  google,
 };

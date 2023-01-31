@@ -247,3 +247,6 @@ export function wrap(adapter) {
 
 // default export contains the aws secrets plugin
 export const lambda = wrap(createAdapter()).with(awsSecretsPlugin);
+
+// create raw adapter for easier testing
+lambda.raw = createAdapter();
