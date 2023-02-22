@@ -94,13 +94,27 @@ export function createAdapter(opts = {}) {
       }
 
       const host = event.requestContext?.domainName;
+      const method = event.requestContext?.http?.method;
+      const requestBody = event.isBase64Encoded ? Buffer.from(event.body, 'base64') : event.body;
       const path = event.rawPath ?? '';
       const queryString = nonHttp ? eventToQueryString(event) : event.rawQueryString || '';
 
+      if (method && ['GET', 'HEAD'].includes(method.toUpperCase()) && requestBody) {
+        return {
+          statusCode: 400,
+          headers: {
+            'content-type': 'text/plain',
+            'x-error': 'Request with GET/HEAD method cannot have body',
+            'x-invocation-id': context.awsRequestId,
+          },
+          body: '',
+        };
+      }
+
       const request = new Request(`https://${host}${path}${queryString ? '?' : ''}${queryString}`, {
-        method: event.requestContext?.http?.method,
+        method,
         headers,
-        body: event.isBase64Encoded ? Buffer.from(event.body, 'base64') : event.body,
+        body: requestBody,
       });
 
       // parse ARN

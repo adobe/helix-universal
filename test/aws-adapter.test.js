@@ -702,4 +702,25 @@ describe('Adapter tests for AWS', () => {
     );
     assert.deepStrictEqual(res, 'ok');
   });
+
+  it('reports non-empty body with GET/HEAD request as 400', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        main: async () => new Response('okay'),
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT,
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+      body: {
+        a: 'b',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 400);
+  });
 });
