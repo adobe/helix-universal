@@ -1,3 +1,10 @@
+## [4.1.4](https://github.com/adobe/helix-universal/compare/v4.1.3...v4.1.4) (2023-02-22)
+
+
+### Bug Fixes
+
+* check whether HTTP method allows body ([#210](https://github.com/adobe/helix-universal/issues/210)) ([8c170ac](https://github.com/adobe/helix-universal/commit/8c170ac0cf1bf0e2287cf6fcf49042b93444ecbb))
+
 ## [4.1.3](https://github.com/adobe/helix-universal/compare/v4.1.2...v4.1.3) (2023-02-14)
 
 
