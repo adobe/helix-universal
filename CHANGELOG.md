@@ -1,3 +1,10 @@
+## [4.1.5](https://github.com/adobe/helix-universal/compare/v4.1.4...v4.1.5) (2023-03-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/fetch to v4.0.5 ([#216](https://github.com/adobe/helix-universal/issues/216)) ([4e3a513](https://github.com/adobe/helix-universal/commit/4e3a513ae761e9f41c131a49e68b0efec960bd6e))
+
 ## [4.1.4](https://github.com/adobe/helix-universal/compare/v4.1.3...v4.1.4) (2023-02-22)
 
 
