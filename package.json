@@ -42,11 +42,11 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.2",
-    "@google-cloud/secret-manager": "4.2.1",
+    "@google-cloud/secret-manager": "4.2.2",
     "@google-cloud/storage": "6.9.5",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "aws-sdk": "2.1353.0",
+    "aws-sdk": "2.1359.0",
     "c8": "7.13.0",
     "eslint": "8.38.0",
     "esmock": "2.2.1",
