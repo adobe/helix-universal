@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/adobe/helix-universal/compare/v4.1.11...v4.2.0) (2023-06-08)
+
+
+### Features
+
+* support throwing errors with custom http status codes ([#241](https://github.com/adobe/helix-universal/issues/241)) ([12b4ec2](https://github.com/adobe/helix-universal/commit/12b4ec2dd94480a9efad6c5bcbb253478b250b5c))
+
 ## [4.1.11](https://github.com/adobe/helix-universal/compare/v4.1.10...v4.1.11) (2023-05-18)
 
 
