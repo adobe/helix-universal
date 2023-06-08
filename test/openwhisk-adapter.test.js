@@ -493,7 +493,6 @@ describe('OpenWhisk Adapter Test', () => {
         'x-forwarded-host': 'adobeioruntime.net,test.com',
       },
     });
-    console.log(resp);
     assert.strictEqual(resp.statusCode, 403);
     assert.strictEqual(resp.body, 'unauthorized - custom message');
     assert.deepStrictEqual(resp.headers, {
