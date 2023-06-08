@@ -216,7 +216,7 @@ export function createAdapter(opts = {}) {
         throw e;
       }
       return {
-        statusCode: 500,
+        statusCode: e.statusCode || 500,
         headers: {
           'content-type': 'text/plain',
           'x-error': cleanupHeaderValue(e.message),

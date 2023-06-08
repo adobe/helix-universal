@@ -107,7 +107,7 @@ export function createAdapter(opts = {}) {
       // eslint-disable-next-line no-console
       console.error('error while invoking function', e);
       res
-        .status(500)
+        .status(e.statusCode || 500)
         .set('content-type', 'text/plain')
         .set('x-invocation-id', req.headers['function-execution-id'])
         .set('x-error', cleanupHeaderValue(e.message))

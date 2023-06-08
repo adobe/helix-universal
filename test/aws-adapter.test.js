@@ -723,4 +723,25 @@ describe('Adapter tests for AWS', () => {
     }, DEFAULT_CONTEXT);
     assert.strictEqual(res.statusCode, 400);
   });
+
+  it('handles throwing error with custom status code', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        main: () => {
+          const error = new Error('unauthorized - custom message');
+          error.statusCode = 403;
+          throw error;
+        },
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+    const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 403);
+    assert.strictEqual(res.body, 'unauthorized - custom message');
+    assert.deepStrictEqual(res.headers, {
+      'content-type': 'text/plain',
+      'x-error': 'unauthorized - custom message',
+      'x-invocation-id': '535f0399-9c90-4042-880e-620cfec6af55',
+    });
+  });
 });

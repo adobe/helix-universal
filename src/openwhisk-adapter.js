@@ -175,13 +175,13 @@ export function wrap(adapter) {
       // eslint-disable-next-line no-console
       console.error('error while invoking function', e);
       return {
-        statusCode: 500,
+        statusCode: e.statusCode || 500,
         headers: {
           'Content-Type': 'text/plain',
           'x-invocation-id': process.env.__OW_ACTIVATION_ID,
           'x-error': cleanupHeaderValue(e.message),
         },
-        body: 'Internal Server Error',
+        body: (typeof e.statusCode === 'undefined' || e.statusCode === 500) ? 'Internal Server Error' : e.message,
       };
     }
   };
