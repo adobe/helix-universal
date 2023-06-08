@@ -349,4 +349,32 @@ describe('Adapter tests for Google', () => {
       'plugin1 after',
     ]);
   });
+
+  it('handles throwing error with custom status code', async () => {
+    process.env.K_SERVICE = 'simple-package--simple-name';
+    process.env.K_REVISION = '1.45.0';
+    const { google } = await esmock.p('../src/google-adapter.js', {
+      '../src/main.js': {
+        main: () => {
+          const error = new Error('unauthorized - custom message');
+          error.statusCode = 403;
+          throw error;
+        },
+      },
+      '../src/google-secrets.js': proxySecretsPlugin(googleSecretsPlugin),
+    });
+    const req = createMockRequest('/api/simple-package/simple-name/1.45.0/foo', {
+      host: 'us-central1-helix-225321.cloudfunctions.net',
+      'function-execution-id': '1234',
+    });
+    const res = createMockResponse();
+    await google(req, res);
+    assert.strictEqual(res.code, 403);
+    assert.strictEqual(res.body, 'unauthorized - custom message');
+    assert.deepStrictEqual(res.headers, {
+      'content-type': 'text/plain',
+      'x-error': 'unauthorized - custom message',
+      'x-invocation-id': '1234',
+    });
+  });
 });

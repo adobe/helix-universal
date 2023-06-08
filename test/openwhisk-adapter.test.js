@@ -475,4 +475,30 @@ describe('OpenWhisk Adapter Test', () => {
       'plugin1 after',
     ]);
   });
+
+  it('handles throwing error with custom status code', async () => {
+    const { openwhisk: main } = await esmock.p('../src/openwhisk-adapter.js', {
+      '../src/main.js': {
+        main: () => {
+          const error = new Error('unauthorized - custom message');
+          error.statusCode = 403;
+          throw error;
+        },
+
+      },
+    });
+
+    const resp = await main({
+      __ow_headers: {
+        'x-forwarded-host': 'adobeioruntime.net,test.com',
+      },
+    });
+    assert.strictEqual(resp.statusCode, 403);
+    assert.strictEqual(resp.body, 'unauthorized - custom message');
+    assert.deepStrictEqual(resp.headers, {
+      'Content-Type': 'text/plain',
+      'x-error': 'unauthorized - custom message',
+      'x-invocation-id': '1234',
+    });
+  });
 });
