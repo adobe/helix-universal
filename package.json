@@ -47,7 +47,7 @@
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "aws-sdk": "2.1399.0",
-    "c8": "7.14.0",
+    "c8": "8.0.0",
     "eslint": "8.43.0",
     "esmock": "2.3.1",
     "husky": "8.0.3",
