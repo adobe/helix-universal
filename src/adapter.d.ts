@@ -100,6 +100,21 @@ export declare interface InvocationInfo {
 }
 
 /**
+ * Logger
+ */
+export declare interface Logger {
+  log(args): void;
+  fatal(args): void;
+  error(args): void;
+  warn(args): void;
+  info(args): void;
+  debug(args): void;
+  verbose(args): void;
+  silly(args): void;
+  trace(args): void;
+}
+
+/**
  * Universal context
  */
 export declare interface UniversalContext {
@@ -133,6 +148,11 @@ export declare interface UniversalContext {
    * User defined environment
    */
   env:object;
+
+  /**
+   * Logger
+   */
+  log: Logger;
 }
 
 /**
