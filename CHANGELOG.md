@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/adobe/helix-universal/compare/v4.2.0...v4.3.0) (2023-08-04)
+
+
+### Features
+
+* types ([35bd46f](https://github.com/adobe/helix-universal/commit/35bd46fa249f98c62cbfff06607b876189580c69))
+
 # [4.2.0](https://github.com/adobe/helix-universal/compare/v4.1.11...v4.2.0) (2023-06-08)
 
 
