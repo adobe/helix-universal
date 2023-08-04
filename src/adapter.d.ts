@@ -104,7 +104,7 @@ export declare interface InvocationInfo {
  */
 export declare interface Logger {
   log(args): void;
-  fatal(args): void;
+  fatal(...args): void;
   error(args): void;
   warn(args): void;
   info(args): void;
