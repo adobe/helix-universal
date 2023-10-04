@@ -1,3 +1,10 @@
+# [4.4.0](https://github.com/adobe/helix-universal/compare/v4.3.1...v4.4.0) (2023-10-04)
+
+
+### Features
+
+* add context.attributes ([#268](https://github.com/adobe/helix-universal/issues/268)) ([b22fc7c](https://github.com/adobe/helix-universal/commit/b22fc7c3fb663020289d753c73202e431a477389))
+
 ## [4.3.1](https://github.com/adobe/helix-universal/compare/v4.3.0...v4.3.1) (2023-09-13)
 
 
