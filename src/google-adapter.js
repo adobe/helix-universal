@@ -80,6 +80,7 @@ export function createAdapter(opts = {}) {
         },
         log: createDefaultLogger(),
         storage: GoogleStorage,
+        attributes: {},
       };
 
       updateProcessEnv(context);

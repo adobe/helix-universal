@@ -121,6 +121,7 @@ export function createAdapter(opts = {}) {
       },
       env,
       log: createDefaultLogger(),
+      attributes: {},
     };
 
     updateProcessEnv(context);
