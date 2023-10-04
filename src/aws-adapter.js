@@ -157,6 +157,7 @@ export function createAdapter(opts = {}) {
         },
         storage: AWSStorage,
         log: createDefaultLogger(),
+        attributes: {},
       };
 
       // support for Amazon SQS, remember records passed by trigger

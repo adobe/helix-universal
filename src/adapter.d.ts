@@ -153,6 +153,12 @@ export declare interface UniversalContext {
    * Logger
    */
   log: Logger;
+
+  /**
+   * User defined attributes
+   * Note: the context attributes are heavily used in helix-admin and helix-admin-support
+   */
+  attributes: object;
 }
 
 /**
