@@ -46,9 +46,9 @@
     "@google-cloud/storage": "7.6.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "aws-sdk": "2.1494.0",
+    "aws-sdk": "2.1499.0",
     "c8": "8.0.1",
-    "eslint": "8.53.0",
+    "eslint": "8.54.0",
     "esmock": "2.6.0",
     "husky": "8.0.3",
     "junit-report-builder": "3.1.0",
@@ -56,7 +56,7 @@
     "mocha": "10.2.0",
     "mocha-multi-reporters": "^1.5.1",
     "nock": "13.3.8",
-    "semantic-release": "22.0.7"
+    "semantic-release": "22.0.8"
   },
   "lint-staged": {
     "*.js": "eslint"
