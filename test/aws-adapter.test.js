@@ -745,12 +745,12 @@ describe('Adapter tests for AWS', () => {
     });
   });
 
-  it('can be forced into non-http mode', async () => {
+  it('can be forced to return the raw response', async () => {
     const { lambda } = await esmock.p('../src/aws-adapter.js', {
       '../src/main.js': {
         main: async () => new Response('ok', {
           headers: {
-            'force-non-http': 'true',
+            'x-aws-raw-response': 'true',
           },
         }),
       },
