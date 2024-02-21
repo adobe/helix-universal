@@ -179,7 +179,7 @@ export function createAdapter(opts = {}) {
         await con.log.flush();
       }
 
-      if (nonHttp) {
+      if (nonHttp || response.headers.get('x-aws-raw-response') === 'true') {
         // directly return response body
         if (response.headers.get('content-type') === 'application/json') {
           return await response.json();

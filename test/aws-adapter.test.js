@@ -744,4 +744,24 @@ describe('Adapter tests for AWS', () => {
       'x-invocation-id': '535f0399-9c90-4042-880e-620cfec6af55',
     });
   });
+
+  it('can be forced to return the raw response', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        main: async () => new Response('ok', {
+          headers: {
+            'x-aws-raw-response': 'true',
+          },
+        }),
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+    const res = await lambda(
+      {
+        requestContext: {},
+      },
+      DEFAULT_CONTEXT,
+    );
+    assert.deepStrictEqual(res, 'ok');
+  });
 });
