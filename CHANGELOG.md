@@ -1,3 +1,10 @@
+# [4.5.0](https://github.com/adobe/helix-universal/compare/v4.4.1...v4.5.0) (2024-02-21)
+
+
+### Features
+
+* allow functions specify a raw AWS response ([80737e2](https://github.com/adobe/helix-universal/commit/80737e28800988c73f5142cb161386491b4d3990)), closes [#296](https://github.com/adobe/helix-universal/issues/296)
+
 ## [4.4.1](https://github.com/adobe/helix-universal/compare/v4.4.0...v4.4.1) (2023-10-30)
 
 
