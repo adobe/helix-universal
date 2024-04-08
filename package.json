@@ -48,7 +48,7 @@
     "@semantic-release/git": "10.0.1",
     "aws-sdk": "2.1594.0",
     "c8": "9.1.0",
-    "eslint": "8.57.0",
+    "eslint": "9.0.0",
     "esmock": "2.6.4",
     "husky": "9.0.11",
     "junit-report-builder": "3.2.1",
