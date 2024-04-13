@@ -46,7 +46,7 @@
     "@google-cloud/storage": "7.9.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "aws-sdk": "2.1594.0",
+    "aws-sdk": "2.1599.0",
     "c8": "9.1.0",
     "eslint": "8.57.0",
     "esmock": "2.6.4",
