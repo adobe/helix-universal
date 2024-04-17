@@ -1,3 +1,10 @@
+## [4.5.2](https://github.com/adobe/helix-universal/compare/v4.5.1...v4.5.2) (2024-04-17)
+
+
+### Bug Fixes
+
+* move to GH actions ([#311](https://github.com/adobe/helix-universal/issues/311)) ([fd6c394](https://github.com/adobe/helix-universal/commit/fd6c394e16c2076312153fbc6026766978c14976))
+
 ## [4.5.1](https://github.com/adobe/helix-universal/compare/v4.5.0...v4.5.1) (2024-04-11)
 
 
