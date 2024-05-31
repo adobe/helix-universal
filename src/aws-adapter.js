@@ -47,22 +47,35 @@ function eventToQueryString(event) {
  * headers, separately.
  *
  * @param raw raw headers object
- * @returns object containing a property 'headers' and a property 'multiValueHeaders'
+ * @param log log
+ * @returns object containing a property 'headers' and a property 'cookies'
  */
-function splitHeaders(raw) {
+function splitHeaders(raw, log) {
   const headers = {};
-  const multiValueHeaders = {};
+  const cookies = [];
 
   Object.entries(raw).forEach(([name, value]) => {
     if (Array.isArray(value)) {
-      multiValueHeaders[name] = value;
+      const lwrname = name.toLowerCase();
+      switch (lwrname) {
+        case 'vary':
+          headers[name] = value.join(', ');
+          break;
+        case 'set-cookie':
+          cookies.push(...value);
+          break;
+        default:
+          log.warn(`Unexpected multi value header: ${name}, combining with spaces.`);
+          headers[name] = value.join(' ');
+          break;
+      }
     } else {
       headers[name] = value;
     }
   });
   return {
     headers,
-    multiValueHeaders,
+    cookies,
   };
 }
 
@@ -193,7 +206,7 @@ export function createAdapter(opts = {}) {
 
       return {
         statusCode: response.status,
-        ...splitHeaders(response.headers.raw()),
+        ...splitHeaders(response.headers.raw(), con.log),
         isBase64Encoded,
         body,
       };
