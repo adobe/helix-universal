@@ -1,3 +1,10 @@
+## [4.5.3](https://github.com/adobe/helix-universal/compare/v4.5.2...v4.5.3) (2024-05-31)
+
+
+### Bug Fixes
+
+* stop using multiHeadersValue ([#318](https://github.com/adobe/helix-universal/issues/318)) ([aeedd84](https://github.com/adobe/helix-universal/commit/aeedd84e009673227248330d3ac5e2caeda4a7f1))
+
 ## [4.5.2](https://github.com/adobe/helix-universal/compare/v4.5.1...v4.5.2) (2024-04-17)
 
 
