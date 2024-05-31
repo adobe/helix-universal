@@ -1,3 +1,18 @@
+# [5.0.0](https://github.com/adobe/helix-universal/compare/v4.5.4...v5.0.0) (2024-05-31)
+
+
+### Bug Fixes
+
+* stop using multiHeadersValue ([#318](https://github.com/adobe/helix-universal/issues/318)) ([6ea13d4](https://github.com/adobe/helix-universal/commit/6ea13d4b5c64c292cb7dde791131d3af29cf6e39))
+
+
+### BREAKING CHANGES
+
+* only works with HTTP API Gateway Payload 2.0
+* fix: combine vary header values into one
+
+* fix: combine all multi header values
+
 ## [4.5.4](https://github.com/adobe/helix-universal/compare/v4.5.3...v4.5.4) (2024-05-31)
 
 
