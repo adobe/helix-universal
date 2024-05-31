@@ -33,7 +33,8 @@
     "reporter-options": "configFile=.mocha-multi.json",
     "loader": "esmock",
     "require": [
-      "test/setup-env.js"
+      "test/setup-env.js",
+      "mocha-suppress-logs"
     ]
   },
   "homepage": "https://github.com/adobe/helix-universal#readme",
@@ -56,6 +57,7 @@
     "lint-staged": "15.2.5",
     "mocha": "10.4.0",
     "mocha-multi-reporters": "^1.5.1",
+    "mocha-suppress-logs": "0.5.1",
     "nock": "13.5.4",
     "semantic-release": "23.1.1"
   },
