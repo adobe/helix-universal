@@ -551,6 +551,33 @@ describe('Adapter tests for AWS', () => {
     ]);
   });
 
+  it('handles multiple vary headers', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async () => {
+          const headers = new Headers();
+          headers.append('vary', 'x-forwarded-host');
+          headers.append('vary', 'accept-encoding');
+          return new Response('okay', { headers });
+        },
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT,
+      cookies: [
+      ],
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.headers.vary, 'x-forwarded-host, accept-encoding');
+  });
+
   it('can be run without requestContext', async () => {
     const { lambda } = await esmock.p('../src/aws-adapter.js', {
       '../src/main.js': {

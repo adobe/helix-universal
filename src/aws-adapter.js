@@ -55,7 +55,12 @@ function splitHeaders(raw) {
 
   Object.entries(raw).forEach(([name, value]) => {
     if (Array.isArray(value)) {
-      multiValueHeaders[name] = value;
+      if (name.toLowerCase() === 'vary') {
+        // remedy for AWS HTTP API Gateway bug
+        headers[name] = value.join(', ');
+      } else {
+        multiValueHeaders[name] = value;
+      }
     } else {
       headers[name] = value;
     }
