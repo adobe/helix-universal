@@ -1,3 +1,10 @@
+## [4.5.4](https://github.com/adobe/helix-universal/compare/v4.5.3...v4.5.4) (2024-05-31)
+
+
+### Reverts
+
+* Revert "fix: stop using multiHeadersValue (#318)" ([26ac415](https://github.com/adobe/helix-universal/commit/26ac41550be806a020aa611044ef09d3b4d894ec)), closes [#318](https://github.com/adobe/helix-universal/issues/318)
+
 ## [4.5.3](https://github.com/adobe/helix-universal/compare/v4.5.2...v4.5.3) (2024-05-31)
 
 
