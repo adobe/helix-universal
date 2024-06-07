@@ -1,3 +1,10 @@
+## [5.0.3](https://github.com/adobe/helix-universal/compare/v5.0.2...v5.0.3) (2024-06-07)
+
+
+### Bug Fixes
+
+* (a)wait for json response ([#323](https://github.com/adobe/helix-universal/issues/323)) ([2a44654](https://github.com/adobe/helix-universal/commit/2a44654e8bbdfb0332949c50117c60273ed04bca))
+
 ## [5.0.2](https://github.com/adobe/helix-universal/compare/v5.0.1...v5.0.2) (2024-06-06)
 
 
