@@ -59,6 +59,7 @@ function splitHeaders(raw, log) {
       const lwrname = name.toLowerCase();
       switch (lwrname) {
         case 'vary':
+        case 'server-timing':
           headers[name] = value.join(', ');
           break;
         case 'set-cookie':
