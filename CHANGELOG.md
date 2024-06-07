@@ -1,3 +1,10 @@
+## [5.0.4](https://github.com/adobe/helix-universal/compare/v5.0.3...v5.0.4) (2024-06-07)
+
+
+### Bug Fixes
+
+* combine server-timing with comma ([#325](https://github.com/adobe/helix-universal/issues/325)) ([0cd73f3](https://github.com/adobe/helix-universal/commit/0cd73f346f65938bce837f439889be53377ca7e2))
+
 ## [5.0.3](https://github.com/adobe/helix-universal/compare/v5.0.2...v5.0.3) (2024-06-07)
 
 
