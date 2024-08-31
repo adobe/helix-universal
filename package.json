@@ -40,7 +40,7 @@
   "homepage": "https://github.com/adobe/helix-universal#readme",
   "dependencies": {
     "@adobe/fetch": "4.1.8",
-    "aws4": "1.13.1"
+    "aws4": "1.13.2"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.6",
@@ -48,7 +48,7 @@
     "@google-cloud/storage": "7.12.1",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "aws-sdk": "2.1682.0",
+    "aws-sdk": "2.1687.0",
     "c8": "10.1.2",
     "eslint": "8.57.0",
     "esmock": "2.6.7",
