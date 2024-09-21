@@ -39,7 +39,7 @@
   },
   "homepage": "https://github.com/adobe/helix-universal#readme",
   "dependencies": {
-    "@adobe/fetch": "4.1.8",
+    "@adobe/fetch": "4.1.9",
     "aws4": "1.13.2"
   },
   "devDependencies": {
