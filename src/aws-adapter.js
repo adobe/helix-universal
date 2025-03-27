@@ -104,7 +104,7 @@ export function responseTooLarge(resp) {
   }
   // worst case, the body contains just `"` which are all escaped so doubling the size.
   // if it's less, we're good.
-  if (body.length < MAXIMUM_RESPONSE_SIZE / 2) {
+  if (body.length * 2 + restSize < MAXIMUM_RESPONSE_SIZE) {
     return false;
   }
   const bodySize = JSON.stringify(body).length;
