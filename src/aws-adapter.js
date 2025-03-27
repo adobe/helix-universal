@@ -27,7 +27,7 @@ import { AWSStorage } from './aws-storage.js';
 /**
  * Maximum response size.
  */
-const MAXIMUM_RESPONSE_SIZE = 6 * 1024 * 1024;
+const MAXIMUM_RESPONSE_SIZE = 6_000_000;
 
 /**
  * Given an event, builds a query string out of the string-valued properties of
