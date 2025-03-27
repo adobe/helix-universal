@@ -247,7 +247,7 @@ export function createAdapter(opts = {}) {
         return {
           statusCode: 413,
           headers: {
-            'x-error': 'Response payload size exceeded maximum allowed payload size (6291556 bytes).',
+            'x-error': `Response payload size exceeded maximum allowed payload size (${MAXIMUM_RESPONSE_SIZE} bytes).`,
           },
           isBase64Encoded: false,
           body: '',
