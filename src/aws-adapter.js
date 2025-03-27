@@ -93,7 +93,9 @@ function splitHeaders(raw, log) {
  */
 export function responseTooLarge(resp) {
   const { body, ...rest } = resp;
-  const restSize = JSON.stringify(rest).length + 8; // 8 is the length of `,"body":`
+  rest.body = '';
+  // it seems that AWS formats the response "nicely"
+  const restSize = JSON.stringify(rest, null, 2).length;
   // quick checks
   if (body.length + restSize >= MAXIMUM_RESPONSE_SIZE) {
     return true;
