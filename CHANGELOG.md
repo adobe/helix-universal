@@ -1,3 +1,10 @@
+# [5.1.0](https://github.com/adobe/helix-universal/compare/v5.0.9...v5.1.0) (2025-03-27)
+
+
+### Features
+
+* check response size of AWS function and respond with 413 if too large ([2c08e87](https://github.com/adobe/helix-universal/commit/2c08e87dcbfdb7730554e498da37973e8e9dda48))
+
 ## [5.0.9](https://github.com/adobe/helix-universal/compare/v5.0.8...v5.0.9) (2025-03-04)
 
 
