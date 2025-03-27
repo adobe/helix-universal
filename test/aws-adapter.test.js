@@ -625,7 +625,7 @@ describe('Adapter tests for AWS', () => {
       },
     }, DEFAULT_CONTEXT);
     assert.strictEqual(res.statusCode, 413);
-    assert.strictEqual(res.headers['x-error'], 'Response payload size exceeded maximum allowed payload size (6291456 bytes).');
+    assert.strictEqual(res.headers['x-error'], 'Response payload size exceeded maximum allowed payload size (6000000 bytes).');
   });
 
   it('can be run without requestContext', async () => {
@@ -860,14 +860,14 @@ describe('AWS Adapter responseTooLarge tests', () => {
 
   it('returns true for an edge case body', () => {
     assert.strictEqual(responseTooLarge({
-      body: '"'.repeat(4 * 1024 * 1024),
+      body: '"'.repeat(3 * 1024 * 1024),
       isBase64Encoded: false,
     }), true);
   });
 
   it('returns false for an almost large base64 body', () => {
     assert.strictEqual(responseTooLarge({
-      body: 'a'.repeat(6 * 1024 * 1024 - 100),
+      body: 'a'.repeat(6_000_000 - 100),
       isBase64Encoded: true,
     }), false);
   });
