@@ -16,6 +16,7 @@ import esmock from 'esmock';
 import { createTestPlugin, proxySecretsPlugin } from './utils.js';
 
 import awsSecretsPlugin from '../src/aws-secrets.js';
+import { responseTooLarge } from '../src/aws-adapter.js';
 
 const DEFAULT_EVENT = {
   version: '2.0',
@@ -602,6 +603,31 @@ describe('Adapter tests for AWS', () => {
     assert.strictEqual(res.headers['x-surrogate-key'], '1 2');
   });
 
+  it('returns a 413 for request too large', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        main: async () => {
+          const headers = new Headers();
+          const body = 'a'.repeat(1024 * 1024 * 7);
+          return new Response(body, { headers });
+        },
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT,
+      cookies: [
+      ],
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 413);
+    assert.strictEqual(res.headers['x-error'], 'Response payload size exceeded maximum allowed payload size (6291456 bytes).');
+  });
+
   it('can be run without requestContext', async () => {
     const { lambda } = await esmock.p('../src/aws-adapter.js', {
       '../src/main.js': {
@@ -814,5 +840,42 @@ describe('Adapter tests for AWS', () => {
       DEFAULT_CONTEXT,
     );
     assert.deepStrictEqual(res, 'ok');
+  });
+});
+
+describe('AWS Adapter responseTooLarge tests', () => {
+  it('returns false for a small body', () => {
+    assert.strictEqual(responseTooLarge({
+      body: 'small',
+      isBase64Encoded: false,
+    }), false);
+  });
+
+  it('returns true for a large body', () => {
+    assert.strictEqual(responseTooLarge({
+      body: 'a'.repeat(7 * 1024 * 1024),
+      isBase64Encoded: false,
+    }), true);
+  });
+
+  it('returns true for an edge case body', () => {
+    assert.strictEqual(responseTooLarge({
+      body: '"'.repeat(4 * 1024 * 1024),
+      isBase64Encoded: false,
+    }), true);
+  });
+
+  it('returns false for an almost large base64 body', () => {
+    assert.strictEqual(responseTooLarge({
+      body: 'a'.repeat(6 * 1024 * 1024 - 100),
+      isBase64Encoded: true,
+    }), false);
+  });
+
+  it('returns true for an almost large base64 body (with rest)', () => {
+    assert.strictEqual(responseTooLarge({
+      body: 'a'.repeat(6 * 1024 * 1024 - 5),
+      isBase64Encoded: true,
+    }), true);
   });
 });
