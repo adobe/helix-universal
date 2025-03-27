@@ -25,6 +25,11 @@ import { AWSResolver } from './resolver.js';
 import { AWSStorage } from './aws-storage.js';
 
 /**
+ * Maximum response size.
+ */
+const MAXIMUM_RESPONSE_SIZE = 6 * 1024 * 1024;
+
+/**
  * Given an event, builds a query string out of the string-valued properties of
  * the event.
  *
@@ -78,6 +83,32 @@ function splitHeaders(raw, log) {
     headers,
     cookies,
   };
+}
+
+/**
+ * Checks if the gateway response object is too large (6mb). The returned object is JSON.stringified
+ * by the lambda runtime, thus the body and headers are escaped and potentially grow in size.
+ * @param resp
+ * @return {boolean} true if response is too large
+ */
+export function responseTooLarge(resp) {
+  const { body, ...rest } = resp;
+  const restSize = JSON.stringify(rest).length + 8; // 8 is the length of `,"body":`
+  // quick checks
+  if (body.length + restSize >= MAXIMUM_RESPONSE_SIZE) {
+    return true;
+  }
+  // a base64 encoded body does not contain any escaped characters
+  if (resp.isBase64Encoded) {
+    return false;
+  }
+  // worst case, the body contains just `"` which are all escaped so doubling the size.
+  // if it's less, we're good.
+  if (body.length < MAXIMUM_RESPONSE_SIZE / 2) {
+    return false;
+  }
+  const bodySize = JSON.stringify(body).length;
+  return bodySize + restSize >= MAXIMUM_RESPONSE_SIZE;
 }
 
 /**
@@ -205,12 +236,25 @@ export function createAdapter(opts = {}) {
       const body = isBase64Encoded ? Buffer.from(await response.arrayBuffer())
         .toString('base64') : await response.text();
 
-      return {
+      const respObject = {
         statusCode: response.status,
         ...splitHeaders(response.headers.raw(), con.log),
         isBase64Encoded,
         body,
       };
+
+      if (responseTooLarge(respObject)) {
+        return {
+          statusCode: 413,
+          headers: {
+            'x-error': 'Response payload size exceeded maximum allowed payload size (6291556 bytes).',
+          },
+          isBase64Encoded: false,
+          body: '',
+        };
+      }
+
+      return respObject;
     } catch (e) {
       if (e instanceof TypeError && e.code === 'ERR_INVALID_CHAR') {
         // eslint-disable-next-line no-console
