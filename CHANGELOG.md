@@ -1,3 +1,10 @@
+## [5.1.1](https://github.com/adobe/helix-universal/compare/v5.1.0...v5.1.1) (2025-03-27)
+
+
+### Bug Fixes
+
+* adjust size check ([#377](https://github.com/adobe/helix-universal/issues/377)) ([1e667b2](https://github.com/adobe/helix-universal/commit/1e667b2a855c49136233ef38697f68e04f13d8c4))
+
 # [5.1.0](https://github.com/adobe/helix-universal/compare/v5.0.9...v5.1.0) (2025-03-27)
 
 
