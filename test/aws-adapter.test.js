@@ -117,6 +117,18 @@ describe('Adapter tests for AWS', () => {
     assert.strictEqual(res.statusCode, 200);
   });
 
+  it('can use `main` created by the default factory directly', async () => {
+    const { createDefaultFactory } = await esmock.p('../src/aws-adapter.js');
+    const factory = await createDefaultFactory();
+    const main = await factory();
+
+    // this will call code in `./src/main.js`
+    const res = await main();
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(await res.text(), 'this file is excluded in npm package.');
+    assert(res);
+  });
+
   it('default can wrap more plugins', async () => {
     const invocations = [];
     const { lambda } = await esmock.p('../src/aws-adapter.js', {
