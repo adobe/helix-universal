@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/adobe/helix-universal/compare/v5.1.1...v5.2.0) (2025-04-15)
+
+
+### Features
+
+* **aws:** export default factory next to raw adapter ([#380](https://github.com/adobe/helix-universal/issues/380)) ([e71bdf9](https://github.com/adobe/helix-universal/commit/e71bdf95e2507a316ec43ebf3170614df52a1262))
+
 ## [5.1.1](https://github.com/adobe/helix-universal/compare/v5.1.0...v5.1.1) (2025-03-27)
 
 
