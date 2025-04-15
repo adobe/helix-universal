@@ -13,6 +13,7 @@
  * dummy function to make esmock/eslint happy.
  * this file is excluded in npm package.
  */
-/* c8 ignore next 2 */
-export default function main() {
+/* c8 ignore next 3 */
+export function main() {
+  return new Response('this file is excluded in npm package.');
 }

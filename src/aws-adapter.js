@@ -114,6 +114,15 @@ export function responseTooLarge(resp) {
 }
 
 /**
+ * Create a default factory to retrieve the main entry point of a service.
+ *
+ * @returns {function} default factory
+ */
+export function createDefaultFactory() {
+  return async () => (await import('./main.js')).main;
+}
+
+/**
  * Creates a universal adapter for google cloud functions.
  * @param {function} opts.factory the factory for the main function. defaults to dynamic import
  * @param {object} opts options
@@ -121,7 +130,7 @@ export function responseTooLarge(resp) {
 export function createAdapter(opts = {}) {
   let { factory } = opts;
   if (!factory) {
-    factory = async () => (await import('./main.js')).main;
+    factory = createDefaultFactory();
   }
 
   /**
@@ -323,5 +332,6 @@ export function wrap(adapter) {
 // default export contains the aws secrets plugin
 export const lambda = wrap(createAdapter()).with(awsSecretsPlugin);
 
-// create raw adapter for easier testing
+// create raw adapter and factory for easier testing
 lambda.raw = createAdapter();
+lambda.factory = createDefaultFactory();
