@@ -16,7 +16,6 @@ export default defineConfig([
   globalIgnores([
     '.vscode/*',
     'coverage/*',
-    'dist/*',
   ]),
   {
     extends: [recommended],
