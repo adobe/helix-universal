@@ -43,7 +43,7 @@
     "aws4": "1.13.2"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "3.0.1",
+    "@adobe/eslint-config-helix": "3.0.2",
     "@eslint/config-helpers": "0.2.2",
     "@google-cloud/secret-manager": "6.0.1",
     "@google-cloud/storage": "7.16.0",
