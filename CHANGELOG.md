@@ -1,3 +1,10 @@
+## [5.2.3](https://github.com/adobe/helix-universal/compare/v5.2.2...v5.2.3) (2025-09-16)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#411](https://github.com/adobe/helix-universal/issues/411)) ([1a48675](https://github.com/adobe/helix-universal/commit/1a4867515a539095874d6c61f7b2eaaeaa5f3222))
+
 ## [5.2.2](https://github.com/adobe/helix-universal/compare/v5.2.1...v5.2.2) (2025-05-26)
 
 
