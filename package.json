@@ -39,11 +39,11 @@
   },
   "homepage": "https://github.com/adobe/helix-universal#readme",
   "dependencies": {
-    "@adobe/fetch": "4.2.2",
+    "@adobe/fetch": "4.2.3",
     "aws4": "1.13.2"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "3.0.9",
+    "@adobe/eslint-config-helix": "3.0.10",
     "@eslint/config-helpers": "0.3.1",
     "@google-cloud/secret-manager": "6.1.0",
     "@google-cloud/storage": "7.17.1",
