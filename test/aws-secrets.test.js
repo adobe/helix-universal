@@ -237,4 +237,31 @@ describe('Secrets tests for AWS', () => {
       /Missing AWS configuration/,
     );
   });
+
+  it('fetches secrets from custom endpoint', async () => {
+    process.env.AWS_ENDPOINT_URL = 'http://localhost:4566';
+
+    nock('http://localhost:4566/')
+      .post('/')
+      .reply((uri, body) => {
+        assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
+        return [200, {
+          SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }),
+        }, {
+          'content-type': 'application/json',
+        }];
+      });
+
+    const plugin = awsSecretsPlugin(() => ({}), { expiration: -1 });
+    await plugin({}, { invokedFunctionArn: 'arn:aws:lambda:us-east-1:118435662149:function:helix3--admin:4_3_1' });
+    const body = { ...process.env };
+    Object.keys(processEnvCopy).forEach((key) => delete body[key]);
+    assert.deepStrictEqual(body, {
+      SOME_SECRET: 'pssst',
+      AWS_ENDPOINT_URL: 'http://localhost:4566',
+      AWS_REGION: 'us-east-1',
+      AWS_ACCESS_KEY_ID: 'fake',
+      AWS_SECRET_ACCESS_KEY: 'fake',
+    });
+  });
 });
