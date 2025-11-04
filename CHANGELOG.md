@@ -1,3 +1,10 @@
+# [5.3.0](https://github.com/adobe/helix-universal/compare/v5.2.3...v5.3.0) (2025-11-04)
+
+
+### Features
+
+* **secrets:** Support custom AWS endpoint ([#419](https://github.com/adobe/helix-universal/issues/419)) ([5f731f6](https://github.com/adobe/helix-universal/commit/5f731f6b0dea7cfbae193d3adbcee15b49c84a8b))
+
 ## [5.2.3](https://github.com/adobe/helix-universal/compare/v5.2.2...v5.2.3) (2025-09-16)
 
 
