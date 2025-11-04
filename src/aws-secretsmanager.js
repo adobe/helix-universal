@@ -56,7 +56,7 @@ export default class SecretsManager {
   async _request(target, input) {
     try {
       const { awsConfig } = this;
-      const { 
+      const {
         region,
         endpointUrl = `https://secretsmanager.${region}.amazonaws.com`,
       } = awsConfig;
