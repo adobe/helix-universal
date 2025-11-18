@@ -44,9 +44,9 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "3.0.13",
-    "@eslint/config-helpers": "0.4.1",
+    "@eslint/config-helpers": "0.4.2",
     "@google-cloud/secret-manager": "6.1.1",
-    "@google-cloud/storage": "7.17.2",
+    "@google-cloud/storage": "7.17.3",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "aws-sdk": "2.1692.0",
