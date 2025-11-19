@@ -132,7 +132,7 @@ Environment variables object. This includes:
 
 #### `context.log`
 
-A logger instance compatible with helix-log. Provides the following methods:
+A logger instance compatible with [helix-log](https://github.com/adobe/helix-log). Provides the following methods:
 - `log(...args)`
 - `fatal(...args)`
 - `error(...args)`
