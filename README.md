@@ -212,57 +212,6 @@ export async function main(request, context) {
 
 **Note:** The `context.attributes` object is heavily used by packages like `@adobe/helix-shared-storage` and `helix-admin` to cache resources and share data between middleware layers.
 
-### Platform Adapters
-
-The library exports platform-specific adapters that wrap your universal function:
-
-#### AWS Lambda
-
-```javascript
-import { lambda } from '@adobe/helix-universal';
-
-// Export the wrapped handler
-export const handler = lambda;
-```
-
-The AWS adapter:
-- Converts Lambda events to `Request` objects
-- Handles HTTP and non-HTTP invocations (e.g., SQS triggers)
-- Automatically loads secrets from AWS Secrets Manager (via `awsSecretsPlugin`)
-- Supports response size limits (6MB maximum)
-- Handles binary responses with base64 encoding
-
-**Non-HTTP invocations:** For non-HTTP events (e.g., SQS), the adapter returns the response body directly (JSON or text) instead of an HTTP response object.
-
-#### Google Cloud Functions
-
-```javascript
-import { google } from '@adobe/helix-universal';
-
-// Export the HTTP function handler
-export const handler = google;
-```
-
-The Google adapter:
-- Converts Express request/response to `Request`/`Response` objects
-- Automatically loads secrets from Google Secret Manager (via `googleSecretsPlugin`)
-- Handles binary responses appropriately
-
-#### Apache OpenWhisk
-
-```javascript
-import { openwhisk } from '@adobe/helix-universal';
-
-// Export the action handler
-export const main = openwhisk;
-```
-
-The OpenWhisk adapter:
-- Converts OpenWhisk action parameters to `Request` objects
-- Handles version locking via `x-ow-version-lock` header
-- Supports query parameters and action parameters
-- Automatically sets `x-last-activation-id` header for web actions
-
 ### Custom Adapters
 
 You can create custom adapters using the `createAdapter` function:
