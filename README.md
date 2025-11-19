@@ -174,13 +174,43 @@ const url = await context.storage.presignURL(
 
 #### `context.attributes`
 
-An object for storing user-defined attributes. Useful for passing data between middleware or plugins.
+An object for storing user-defined attributes. This is particularly useful for passing data between [wrappers](https://github.com/adobe/helix-shared/tree/main/packages/helix-shared-wrap) and middleware functions. Wrappers can store computed values or initialized resources in `context.attributes` so they can be reused across the request lifecycle without re-initialization.
+
+**Common Use Cases:**
+- Caching initialized resources (e.g., storage clients, database connections)
+- Passing data between middleware layers
+- Storing request-scoped metadata
 
 **Example:**
 ```javascript
-context.attributes.userId = '12345';
-context.attributes.requestStartTime = Date.now();
+// In a wrapper function
+function storageWrapper(fn) {
+  return async (request, context) => {
+    // Initialize storage once and cache it in attributes
+    if (!context.attributes.storage) {
+      context.attributes.storage = new HelixStorage({
+        // ... configuration
+      });
+    }
+    return fn(request, context);
+  };
+}
+
+// In your main function
+export async function main(request, context) {
+  // Access the cached storage instance
+  const storage = context.attributes.storage;
+  const bucket = storage.contentBus();
+  
+  // Use other attributes
+  context.attributes.userId = '12345';
+  context.attributes.requestStartTime = Date.now();
+  
+  return new Response('OK');
+}
 ```
+
+**Note:** The `context.attributes` object is heavily used by packages like `@adobe/helix-shared-storage` and `helix-admin` to cache resources and share data between middleware layers.
 
 ### Platform Adapters
 
