@@ -256,26 +256,165 @@ Adapters support a plugin system for extending functionality:
 
 #### Secrets Plugins
 
-Secrets plugins automatically load secrets from platform-specific secret managers and inject them into `process.env`.
+Secrets plugins automatically load secrets from platform-specific secret managers and inject them into `process.env` as environment variables. Both plugins are **included by default** in their respective adapters, so secrets are automatically loaded on every invocation.
 
-**AWS Secrets Plugin:**
+**How Secrets Work:**
+
+1. Secrets are stored as JSON objects in the platform's secret manager
+2. Each key-value pair in the JSON becomes an environment variable
+3. Only secrets that don't already exist in `process.env` are set (existing variables take precedence)
+4. Secrets are available in `context.env` and `process.env` within your function
+
+**AWS Secrets Plugin**
+
+The AWS secrets plugin loads secrets from AWS Secrets Manager.
+
+**Secret Naming Convention:**
+- Secret ID format: `/helix-deploy/{package-name}/all`
+- The package name is extracted from the Lambda function name (everything before `--`)
+- Example: For function `helix-services--dispatch`, secrets are loaded from `/helix-deploy/helix-services/all`
+
+**Configuration:**
 ```javascript
 import { lambda } from '@adobe/helix-universal';
 import awsSecretsPlugin from '@adobe/helix-universal/aws-secrets';
 
 // Already included in default lambda export, but you can customize:
 const customLambda = lambda.raw.with(awsSecretsPlugin, {
-  expiration: 3600000, // Cache expiration (1 hour)
-  checkDelay: 60000,    // Check delay (1 minute)
+  expiration: 3600000,  // Cache expiration time in milliseconds (default: 1 hour)
+  checkDelay: 60000,    // Modification check delay in milliseconds (default: 1 minute)
+  emulateEnv: {         // For testing: provide mock secrets instead of calling AWS
+    API_KEY: 'test-key',
+    DB_PASSWORD: 'test-password',
+  },
 });
 ```
 
-**Google Secrets Plugin:**
+**Caching Behavior:**
+- Secrets are cached in memory for performance
+- Cache expires after `expiration` time (default: 1 hour)
+- Every `checkDelay` (default: 1 minute), the plugin checks if the secret was modified
+- If the secret was modified, it's reloaded automatically
+- This balances performance with the ability to update secrets without redeploying
+
+**AWS Credentials:**
+The plugin requires AWS credentials, which are typically provided via:
+- IAM role attached to the Lambda function (recommended)
+- Environment variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`
+- AWS region: `AWS_REGION` (defaults to Lambda's region)
+
+**Error Handling:**
+- `ResourceNotFoundException`: Returns empty object `{}`, allowing the function to continue without secrets
+- `ThrottlingException`: Throws an error with `statusCode: 429`
+- Other errors: Throws an error, which will be caught by the adapter's error handler
+
+**Custom Endpoint (for local testing):**
+```javascript
+// Use localstack or other AWS-compatible endpoint
+process.env.AWS_ENDPOINT_URL = 'http://localhost:4566';
+```
+
+**Example Secret Structure:**
+Store this JSON in AWS Secrets Manager at `/helix-deploy/my-package/all`:
+```json
+{
+  "API_KEY": "your-api-key-here",
+  "DATABASE_URL": "postgresql://...",
+  "JWT_SECRET": "your-jwt-secret"
+}
+```
+
+**Google Secrets Plugin**
+
+The Google secrets plugin loads secrets from Google Secret Manager.
+
+**Secret Naming Convention:**
+- Secret path format: `projects/{project-id}/secrets/helix-deploy--{package-name}/versions/latest`
+- The project ID is extracted from the Cloud Function hostname subdomain
+- The package name is extracted from `K_SERVICE` environment variable (everything before `--`)
+- Dots in package names are replaced with underscores
+- Example: For function `helix-services--dispatch` in project `helix-225321`, secrets are loaded from `projects/helix-225321/secrets/helix-deploy--helix_services/versions/latest`
+
+**Configuration:**
 ```javascript
 import { google } from '@adobe/helix-universal';
 import googleSecretsPlugin from '@adobe/helix-universal/google-secrets';
 
-// Already included in default google export
+// Already included in default google export, but you can customize:
+const customGoogle = google.raw.with(googleSecretsPlugin, {
+  emulateEnv: {  // For testing: provide mock secrets instead of calling Google
+    API_KEY: 'test-key',
+    DB_PASSWORD: 'test-password',
+  },
+});
+```
+
+**Caching Behavior:**
+- **No caching**: Secrets are fetched on every invocation
+- This ensures you always have the latest secrets, but may impact performance
+
+**Google Cloud Credentials:**
+The plugin requires Google Cloud credentials, which are typically provided via:
+- Service account attached to the Cloud Function (recommended)
+- `GOOGLE_APPLICATION_CREDENTIALS` environment variable pointing to a service account key file
+- Default credentials from the Cloud Function's runtime environment
+
+**Error Handling:**
+- Any error during secret retrieval: Returns empty object `{}`, allowing the function to continue
+- Errors are logged to console but don't fail the invocation
+
+**Example Secret Structure:**
+Store this JSON in Google Secret Manager at `projects/{project-id}/secrets/helix-deploy--my_package/versions/latest`:
+```json
+{
+  "API_KEY": "your-api-key-here",
+  "DATABASE_URL": "postgresql://...",
+  "JWT_SECRET": "your-jwt-secret"
+}
+```
+
+**Using Secrets in Your Function:**
+
+```javascript
+export async function main(request, context) {
+  // Secrets are automatically available in context.env and process.env
+  const apiKey = context.env.API_KEY;
+  const dbUrl = process.env.DATABASE_URL;
+  
+  // Existing environment variables take precedence
+  // If API_KEY is already set in process.env, the secret won't override it
+  
+  return new Response('OK');
+}
+```
+
+**Disabling Secrets Plugin:**
+
+If you want to disable automatic secret loading:
+
+```javascript
+// Use the raw adapter without secrets plugin
+import { lambda } from '@adobe/helix-universal';
+
+export const handler = lambda.raw;  // No secrets plugin
+```
+
+**Testing with Secrets:**
+
+For testing, you can provide mock secrets using the `emulateEnv` option:
+
+```javascript
+import { lambda } from '@adobe/helix-universal';
+import awsSecretsPlugin from '@adobe/helix-universal/aws-secrets';
+
+const testLambda = lambda.raw.with(awsSecretsPlugin, {
+  emulateEnv: {
+    API_KEY: 'test-api-key',
+    TEST_MODE: 'true',
+  },
+});
+
+// Use testLambda in your tests
 ```
 
 #### Custom Plugins
