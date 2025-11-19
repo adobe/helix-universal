@@ -16,6 +16,33 @@
 $ npm install @adobe/helix-universal
 ```
 
+## Deployment
+
+**Helix Universal** is part of the [Helix Deploy](https://github.com/adobe/helix-deploy) ecosystem. [Helix Deploy](https://github.com/adobe/helix-deploy) is the parent project that provides deployment capabilities for universal functions across multiple serverless platforms.
+
+### Supported Platforms
+
+Helix Deploy can deploy universal functions to:
+- **AWS Lambda** - Traditional serverless functions
+- **Google Cloud Functions** - Serverless functions on Google Cloud Platform
+- **Apache OpenWhisk** - Open-source serverless platform
+
+### Edge Compute Support
+
+[Helix Deploy Plugin Edge](https://github.com/adobe/helix-deploy-plugin-edge) extends the reach of Helix Universal to edge compute runtimes, enabling deployment to:
+- **Fastly Compute@Edge** - Edge computing platform
+- **Cloudflare Workers** - Edge computing platform
+
+This allows you to write universal functions that can run at the edge, closer to your users, while maintaining the same universal function interface.
+
+### Secret Naming Convention
+
+When deploying with Helix Deploy, secrets follow a naming convention that includes the `helix-deploy` prefix:
+- **AWS Secrets Manager**: `/helix-deploy/{package-name}/all`
+- **Google Secret Manager**: `projects/{project-id}/secrets/helix-deploy--{package-name}/versions/latest`
+
+This convention ensures secrets are properly organized and accessible to deployed functions across all platforms.
+
 ## API Documentation
 
 This library provides adapters that allow you to write universal serverless functions that work across multiple platforms (AWS Lambda, Google Cloud Functions, and Apache OpenWhisk). Your function receives a standardized `Request` object and `Context` object, regardless of the underlying platform.
