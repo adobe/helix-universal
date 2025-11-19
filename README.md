@@ -44,7 +44,7 @@ async function main(request, context) {
 
 ### Universal Context
 
-The `context` object provides a standardized interface to access platform-specific information and utilities:
+The `context` object provides a standardized interface to access platform-specific information and utilities. Additionally, plugins and wrappers may extend the context with additional properties (see [Available Plugin Packages](#available-plugin-packages) section below).
 
 #### `context.resolver`
 
@@ -469,6 +469,142 @@ function myPlugin(adapter, options) {
 
 const customAdapter = lambda.raw.with(myPlugin, { option: 'value' });
 ```
+
+#### Available Plugin Packages
+
+The Helix ecosystem provides several pre-built plugins that extend the universal runtime functionality. These plugins use the [wrap utility](https://github.com/adobe/helix-shared/tree/main/packages/helix-shared-wrap) to compose middleware around your functions.
+
+**Body Data Plugin** ([@adobe/helix-shared-body-data](https://github.com/adobe/helix-shared/tree/main/packages/helix-shared-body-data))
+
+Parses request bodies (JSON, form data, URL-encoded) and makes the data available in `context.data`:
+
+```javascript
+import wrap from '@adobe/helix-shared-wrap';
+import bodyData from '@adobe/helix-shared-body-data';
+
+export const main = wrap(async (request, context) => {
+  // Access parsed body data
+  const { name, email } = context.data;
+  return new Response(`Hello ${name}!`);
+})
+  .with(bodyData);
+```
+
+**Bounce Plugin** ([@adobe/helix-shared-bounce](https://github.com/adobe/helix-shared/tree/main/packages/helix-shared-bounce))
+
+Provides fast pro-forma responses from slow-running functions. The faster of two responses (a quick responder function or the slow main function) is returned:
+
+```javascript
+import wrap from '@adobe/helix-shared-wrap';
+import bounce from '@adobe/helix-shared-bounce';
+
+async function fastResponder(req, context) {
+  return new Response(`Processing... Use ${context.invocation.bounceId} to track status.`);
+}
+
+export const main = wrap(async (request, context) => {
+  // Slow operation
+  await doSlowWork();
+  return new Response('Done');
+})
+  .with(bounce, { responder: fastResponder });
+```
+
+**Secrets Plugin** ([@adobe/helix-shared-secrets](https://github.com/adobe/helix-shared/tree/main/packages/helix-shared-secrets))
+
+Loads secrets from cloud provider secret managers (currently AWS Secrets Manager) and adds them to `context.env` and `process.env`:
+
+```javascript
+import wrap from '@adobe/helix-shared-wrap';
+import secrets from '@adobe/helix-shared-secrets';
+
+export const main = wrap(async (request, context) => {
+  // Secrets are available in context.env
+  const apiKey = context.env.API_KEY;
+  return new Response('OK');
+})
+  .with(secrets);
+```
+
+**Note:** This is different from the built-in secrets plugins (`awsSecretsPlugin` and `googleSecretsPlugin`) that are automatically included in the adapters. The `@adobe/helix-shared-secrets` plugin provides additional customization options and can be used with custom name functions.
+
+**IMS Plugin** ([@adobe/helix-shared-ims](https://github.com/adobe/helix-shared/tree/main/packages/helix-shared-ims))
+
+Provides Adobe Identity Management System (IMS) authentication. Handles OAuth2 flow and makes user profile available in `context.ims`:
+
+```javascript
+import wrap from '@adobe/helix-shared-wrap';
+import ims from '@adobe/helix-shared-ims';
+
+export const main = wrap(async (request, context) => {
+  if (context.ims.profile) {
+    // User is authenticated
+    const { name, email, userId } = context.ims.profile;
+    return new Response(`Hello ${name}!`);
+  }
+  return new Response('Not authenticated', { status: 401 });
+})
+  .with(ims, { 
+    clientId: 'my-client-id',
+    env: 'prod',
+    forceAuth: true, // Require authentication
+  });
+```
+
+The IMS plugin adds the following to `context.ims`:
+- `context.ims.config`: Resolved IMS configuration
+- `context.ims.accessToken`: Current access token
+- `context.ims.profile`: Authenticated user profile (name, email, userId)
+
+**Server Timing Plugin** ([@adobe/helix-shared-server-timing](https://github.com/adobe/helix-shared/tree/main/packages/helix-shared-server-timing))
+
+Adds performance monitoring by tracking execution time and adding `Server-Timing` HTTP headers:
+
+```javascript
+import wrap from '@adobe/helix-shared-wrap';
+import serverTiming from '@adobe/helix-shared-server-timing';
+
+export const main = wrap(async (request, context) => {
+  const { timer } = context;
+  
+  timer.update('fetch-data');
+  const data = await fetchData();
+  
+  timer.update('process-data');
+  const result = processData(data);
+  
+  timer.update('render');
+  const html = render(result);
+  
+  return new Response(html);
+})
+  .with(serverTiming);
+```
+
+The plugin adds a `timer` object to `context` with an `update(name)` method to record execution milestones. Timing data is automatically added to the `Server-Timing` response header, viewable in browser DevTools.
+
+**Combining Multiple Plugins:**
+
+You can chain multiple plugins together:
+
+```javascript
+import wrap from '@adobe/helix-shared-wrap';
+import bodyData from '@adobe/helix-shared-body-data';
+import ims from '@adobe/helix-shared-ims';
+import serverTiming from '@adobe/helix-shared-server-timing';
+
+export const main = wrap(async (request, context) => {
+  // context.data - parsed body data
+  // context.ims.profile - authenticated user
+  // context.timer - performance timer
+  return new Response('OK');
+})
+  .with(serverTiming)
+  .with(ims, { clientId: 'my-client-id' })
+  .with(bodyData);
+```
+
+**Note:** Execution order is reversed - the last plugin added executes first.
 
 ### Resolver and Version Locking
 
