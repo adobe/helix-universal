@@ -16,6 +16,375 @@
 $ npm install @adobe/helix-universal
 ```
 
+## API Documentation
+
+This library provides adapters that allow you to write universal serverless functions that work across multiple platforms (AWS Lambda, Google Cloud Functions, and Apache OpenWhisk). Your function receives a standardized `Request` object and `Context` object, regardless of the underlying platform.
+
+### Universal Function Signature
+
+All universal functions follow this signature:
+
+```javascript
+async function main(request, context) {
+  // Your function logic here
+  return new Response('Hello, World!', {
+    status: 200,
+    headers: {
+      'content-type': 'text/plain',
+    },
+  });
+}
+```
+
+**Parameters:**
+- `request` (Request): A standard [Fetch API Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the HTTP request details
+- `context` (UniversalContext): A context object providing runtime information, function metadata, and utilities
+
+**Returns:** A [Fetch API Response](https://developer.mozilla.org/en-US/docs/Web/API/Response) object
+
+### Universal Context
+
+The `context` object provides a standardized interface to access platform-specific information and utilities:
+
+#### `context.resolver`
+
+A `Resolver` instance for creating URLs to invoke other functions/actions. Supports version locking via the `x-ow-version-lock` header.
+
+**Methods:**
+- `createURL(options)`: Creates a URL for invoking another function
+  - `options.name` (string, required): Function/action name
+  - `options.package` (string, optional): Package name
+  - `options.version` (string, optional): Version to invoke
+
+**Example:**
+```javascript
+// Invoke another function
+const url = context.resolver.createURL({
+  package: 'helix-services',
+  name: 'content-proxy',
+  version: '1.2.3',
+});
+// url is a URL object pointing to the function
+```
+
+#### `context.pathInfo`
+
+Path information about the current request.
+
+**Properties:**
+- `suffix` (string): The request path suffix (e.g., `/foo/bar` from `/api/function/foo/bar`)
+
+#### `context.runtime`
+
+Information about the runtime environment.
+
+**Properties:**
+- `name` (string): Runtime name (`'aws-lambda'`, `'googlecloud-functions'`, or `'apache-openwhisk'`)
+- `region` (string): Deployment region (e.g., `'us-east-1'`, `'us-central1'`)
+- `accountId` (string, AWS only): AWS account ID
+
+#### `context.func`
+
+Information about the current function.
+
+**Properties:**
+- `name` (string): Function name (stemmed name without package/version)
+- `package` (string): Package name
+- `version` (string): Function version
+- `app` (string): Application/namespace name
+- `fqn` (string): Fully qualified name (platform-specific format)
+
+**Example values:**
+```javascript
+{
+  name: 'dispatch',
+  package: 'helix-services',
+  version: '4.3.1',
+  app: 'helix-pages',
+  fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-services--dispatch:4_3_1'
+}
+```
+
+#### `context.invocation`
+
+Information about the current invocation.
+
+**Properties:**
+- `id` (string): Unique invocation ID (activation ID for OpenWhisk, request ID for AWS/Google)
+- `deadline` (number): Unix timestamp (milliseconds) when the function will timeout
+- `transactionId` (string, optional): Transaction ID for tracing across multiple invocations
+- `requestId` (string, optional): Request ID identifying the HTTP request
+- `event` (object, AWS only): Raw AWS Lambda event object
+
+#### `context.env`
+
+Environment variables object. This includes:
+- All `process.env` variables
+- Secrets loaded from platform-specific secret managers (when using secrets plugins)
+- Function-specific environment variables
+
+**Note:** The following environment variables are automatically set:
+- `HELIX_UNIVERSAL_RUNTIME`: Runtime name
+- `HELIX_UNIVERSAL_NAME`: Function name
+- `HELIX_UNIVERSAL_PACKAGE`: Package name
+- `HELIX_UNIVERSAL_APP`: Application name
+- `HELIX_UNIVERSAL_VERSION`: Function version
+
+#### `context.log`
+
+A logger instance compatible with helix-log. Provides the following methods:
+- `log(...args)`
+- `fatal(...args)`
+- `error(...args)`
+- `warn(...args)`
+- `info(...args)`
+- `debug(...args)`
+- `verbose(...args)`
+- `silly(...args)`
+- `trace(...args)`
+
+**Example:**
+```javascript
+context.log.info('Processing request', { url: request.url });
+context.log.error('Something went wrong', error);
+```
+
+#### `context.storage`
+
+Storage API for generating presigned URLs for cloud storage.
+
+**Methods:**
+- `presignURL(bucket, path, blobParams, method, expires)`: Generate a presigned URL
+  - `bucket` (string): Storage bucket name
+  - `path` (string): Object path within the bucket
+  - `blobParams` (object, optional): Additional parameters (e.g., `ContentType`, `ContentDisposition`)
+  - `method` (string, optional): HTTP method (`'GET'` or `'PUT'`), defaults to `'GET'`
+  - `expires` (number, optional): Expiration time in seconds, defaults to `60`
+
+**Example:**
+```javascript
+const url = await context.storage.presignURL(
+  'my-bucket',
+  'path/to/file.jpg',
+  { ContentType: 'image/jpeg' },
+  'GET',
+  3600
+);
+```
+
+#### `context.attributes`
+
+An object for storing user-defined attributes. Useful for passing data between middleware or plugins.
+
+**Example:**
+```javascript
+context.attributes.userId = '12345';
+context.attributes.requestStartTime = Date.now();
+```
+
+### Platform Adapters
+
+The library exports platform-specific adapters that wrap your universal function:
+
+#### AWS Lambda
+
+```javascript
+import { lambda } from '@adobe/helix-universal';
+
+// Export the wrapped handler
+export const handler = lambda;
+```
+
+The AWS adapter:
+- Converts Lambda events to `Request` objects
+- Handles HTTP and non-HTTP invocations (e.g., SQS triggers)
+- Automatically loads secrets from AWS Secrets Manager (via `awsSecretsPlugin`)
+- Supports response size limits (6MB maximum)
+- Handles binary responses with base64 encoding
+
+**Non-HTTP invocations:** For non-HTTP events (e.g., SQS), the adapter returns the response body directly (JSON or text) instead of an HTTP response object.
+
+#### Google Cloud Functions
+
+```javascript
+import { google } from '@adobe/helix-universal';
+
+// Export the HTTP function handler
+export const handler = google;
+```
+
+The Google adapter:
+- Converts Express request/response to `Request`/`Response` objects
+- Automatically loads secrets from Google Secret Manager (via `googleSecretsPlugin`)
+- Handles binary responses appropriately
+
+#### Apache OpenWhisk
+
+```javascript
+import { openwhisk } from '@adobe/helix-universal';
+
+// Export the action handler
+export const main = openwhisk;
+```
+
+The OpenWhisk adapter:
+- Converts OpenWhisk action parameters to `Request` objects
+- Handles version locking via `x-ow-version-lock` header
+- Supports query parameters and action parameters
+- Automatically sets `x-last-activation-id` header for web actions
+
+### Custom Adapters
+
+You can create custom adapters using the `createAdapter` function:
+
+```javascript
+import { createAdapter } from '@adobe/helix-universal/aws';
+
+const adapter = createAdapter({
+  factory: async () => {
+    // Custom factory function to load your main function
+    return (await import('./my-main.js')).main;
+  },
+});
+
+export const handler = adapter;
+```
+
+### Plugins
+
+Adapters support a plugin system for extending functionality:
+
+#### Secrets Plugins
+
+Secrets plugins automatically load secrets from platform-specific secret managers and inject them into `process.env`.
+
+**AWS Secrets Plugin:**
+```javascript
+import { lambda } from '@adobe/helix-universal';
+import awsSecretsPlugin from '@adobe/helix-universal/aws-secrets';
+
+// Already included in default lambda export, but you can customize:
+const customLambda = lambda.raw.with(awsSecretsPlugin, {
+  expiration: 3600000, // Cache expiration (1 hour)
+  checkDelay: 60000,    // Check delay (1 minute)
+});
+```
+
+**Google Secrets Plugin:**
+```javascript
+import { google } from '@adobe/helix-universal';
+import googleSecretsPlugin from '@adobe/helix-universal/google-secrets';
+
+// Already included in default google export
+```
+
+#### Custom Plugins
+
+You can create custom plugins:
+
+```javascript
+function myPlugin(adapter, options) {
+  return async (event, context) => {
+    // Pre-processing
+    context.attributes.customData = 'value';
+    
+    // Call the adapter
+    const response = await adapter(event, context);
+    
+    // Post-processing
+    response.headers.set('x-custom-header', 'value');
+    
+    return response;
+  };
+}
+
+const customAdapter = lambda.raw.with(myPlugin, { option: 'value' });
+```
+
+### Resolver and Version Locking
+
+The resolver supports version locking, allowing you to pin specific versions of functions via the `x-ow-version-lock` header:
+
+```javascript
+// Client sends header: x-ow-version-lock: content-proxy=1.2.3&dispatch=2.0.0
+
+// In your function:
+const url = context.resolver.createURL({
+  package: 'helix-services',
+  name: 'content-proxy',
+  version: '1.5.0', // This will be overridden to 1.2.3
+});
+```
+
+### Complete Example
+
+Here's a complete example of a universal function:
+
+```javascript
+import { Response } from '@adobe/fetch';
+
+export async function main(request, context) {
+  // Log request
+  context.log.info('Processing request', {
+    method: request.method,
+    url: request.url,
+    function: context.func.name,
+    version: context.func.version,
+  });
+
+  // Access environment variables
+  const apiKey = context.env.API_KEY;
+
+  // Invoke another function
+  const otherFunctionUrl = context.resolver.createURL({
+    package: 'helix-services',
+    name: 'content-proxy',
+    version: '1.2.3',
+  });
+
+  // Generate presigned URL
+  const presignedUrl = await context.storage.presignURL(
+    'my-bucket',
+    'path/to/file.jpg',
+    {},
+    'GET',
+    3600
+  );
+
+  // Process request
+  const body = await request.json();
+  
+  // Return response
+  return new Response(JSON.stringify({
+    message: 'Success',
+    function: context.func.name,
+    runtime: context.runtime.name,
+    presignedUrl,
+  }), {
+    status: 200,
+    headers: {
+      'content-type': 'application/json',
+    },
+  });
+}
+```
+
+### TypeScript Support
+
+Type definitions are included. Import types as needed:
+
+```typescript
+import type { UniversalContext, UniversalFunction } from '@adobe/helix-universal';
+
+async function main(
+  request: Request,
+  context: UniversalContext
+): Promise<Response> {
+  // TypeScript will provide full type checking
+  return new Response('OK');
+}
+```
+
 ## Development
 
 ### Build
