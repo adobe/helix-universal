@@ -341,9 +341,7 @@ The Google secrets plugin loads secrets from Google Secret Manager.
 
 **Configuration:**
 ```javascript
-import { google } from '@adobe/helix-universal';
-import googleSecretsPlugin from '@adobe/helix-universal/google-secrets';
-
+import { google, googleSecretsPlugin } from '@adobe/helix-universal';
 // Already included in default google export, but you can customize:
 const customGoogle = google.raw.with(googleSecretsPlugin, {
   emulateEnv: {  // For testing: provide mock secrets instead of calling Google
