@@ -406,9 +406,7 @@ export const handler = lambda.raw;  // No secrets plugin
 For testing, you can provide mock secrets using the `emulateEnv` option:
 
 ```javascript
-import { lambda } from '@adobe/helix-universal';
-import awsSecretsPlugin from '@adobe/helix-universal/aws-secrets';
-
+import { lambda, awsSecretsPlugin } from '@adobe/helix-universal';
 const testLambda = lambda.raw.with(awsSecretsPlugin, {
   emulateEnv: {
     API_KEY: 'test-api-key',
