@@ -282,9 +282,7 @@ The AWS secrets plugin loads secrets from AWS Secrets Manager.
 
 **Configuration:**
 ```javascript
-import { lambda } from '@adobe/helix-universal';
-import awsSecretsPlugin from '@adobe/helix-universal/aws-secrets';
-
+import { lambda, awsSecretsPlugin } from '@adobe/helix-universal';
 // Already included in default lambda export, but you can customize:
 const customLambda = lambda.raw.with(awsSecretsPlugin, {
   expiration: 3600000,  // Cache expiration time in milliseconds (default: 1 hour)
