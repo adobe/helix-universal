@@ -46,7 +46,7 @@
     "@adobe/eslint-config-helix": "3.0.15",
     "@eslint/config-helpers": "0.5.0",
     "@google-cloud/secret-manager": "6.1.1",
-    "@google-cloud/storage": "7.17.3",
+    "@google-cloud/storage": "7.18.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "aws-sdk": "2.1692.0",
