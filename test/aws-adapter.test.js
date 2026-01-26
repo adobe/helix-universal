@@ -18,6 +18,7 @@ import { createTestPlugin, proxySecretsPlugin } from './utils.js';
 import awsSecretsPlugin from '../src/aws-secrets.js';
 import { responseTooLarge } from '../src/aws-adapter.js';
 
+// API Gateway v2 event
 const DEFAULT_EVENT = {
   version: '2.0',
   routeKey: 'ANY /dump',
@@ -51,6 +52,59 @@ const DEFAULT_EVENT = {
     time: '02/Mar/2021:08:00:59 +0000',
     timeEpoch: 1614672059918,
   },
+  isBase64Encoded: false,
+};
+
+// API Gateway v1 event
+const DEFAULT_EVENT_V1 = {
+  resource: '/{proxy+}',
+  path: '/dump',
+  httpMethod: 'GET',
+  headers: {
+    Accept: '*/*',
+    'Content-Length': '0',
+    Host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+    'User-Agent': 'curl/7.64.1',
+    'X-Amzn-Trace-Id': 'Root=1-603df0bb-05e846307a6221f72030fe68',
+    'X-Forwarded-For': '210.153.232.90',
+    'X-Forwarded-Port': '443',
+    'X-Forwarded-Proto': 'https',
+  },
+  multiValueHeaders: {
+    Accept: ['*/*'],
+    'Content-Length': ['0'],
+    Host: ['kvvyh7ikcb.execute-api.us-east-1.amazonaws.com'],
+    'User-Agent': ['curl/7.64.1'],
+    'X-Amzn-Trace-Id': ['Root=1-603df0bb-05e846307a6221f72030fe68'],
+    'X-Forwarded-For': ['210.153.232.90'],
+    'X-Forwarded-Port': ['443'],
+    'X-Forwarded-Proto': ['https'],
+  },
+  queryStringParameters: null,
+  multiValueQueryStringParameters: null,
+  pathParameters: {
+    proxy: 'dump',
+  },
+  stageVariables: null,
+  requestContext: {
+    accountId: '118435662149',
+    apiId: 'kvvyh7ikcb',
+    resourceId: 'abc123',
+    stage: '$default',
+    requestId: 'bjKNYhHcoAMEJIw=',
+    identity: {
+      sourceIp: '210.153.232.90',
+      userAgent: 'curl/7.64.1',
+    },
+    resourcePath: '/{proxy+}',
+    httpMethod: 'GET',
+    path: '/$default/dump',
+    domainName: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+    domainPrefix: 'kvvyh7ikcb',
+    requestTime: '02/Mar/2021:08:00:59 +0000',
+    requestTimeEpoch: 1614672059918,
+  },
+  body: null,
   isBase64Encoded: false,
 };
 
@@ -96,6 +150,28 @@ describe('Adapter tests for AWS', () => {
       '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
     });
     const res = await lambda(DEFAULT_EVENT, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
+  });
+
+  it('runs the function for api gateway v1', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        main: (request, context) => {
+          assert.deepStrictEqual(context.func, {
+            name: 'dump',
+            package: 'helix-pages',
+            version: '4.3.1',
+            fqn: 'arn:aws:lambda:us-east-1:118435662149:function:helix-pages--dump:4_3_1',
+            app: 'kvvyh7ikcb',
+          });
+          assert.ok(context.log);
+          assert.strictEqual(typeof context.log.silly, 'function');
+          return new Response('ok');
+        },
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+    const res = await lambda(DEFAULT_EVENT_V1, DEFAULT_CONTEXT);
     assert.strictEqual(res.statusCode, 200);
   });
 
@@ -453,6 +529,30 @@ describe('Adapter tests for AWS', () => {
     assert.strictEqual(res.statusCode, 200);
   });
 
+  it('handles request params for api gateway v1', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async (request, context) => {
+          const url = new URL(request.url);
+          assert.strictEqual(url.searchParams.get('foo'), 'bar');
+          assert.strictEqual(context.pathInfo.suffix, '/dump');
+          return new Response('okay');
+        },
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT_V1,
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
+  });
+
   it('handles pathInfo', async () => {
     const { lambda } = await esmock.p('../src/aws-adapter.js', {
       '../src/main.js': {
@@ -561,6 +661,92 @@ describe('Adapter tests for AWS', () => {
       't=1; Secure',
       'u=2; Secure',
     ]);
+  });
+
+  it('properly removes cookies array for api gateway v1', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async (request, context) => {
+          assert.deepStrictEqual(request.headers.plain(), {
+            cookie: 'name1=value1;name2=value2',
+            host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+          });
+          return new Response('okay');
+        },
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT_V1,
+      cookies: [
+        'name1=value1',
+        'name2=value2',
+      ],
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.cookies, undefined);
+  });
+
+  it('properly handles cookie header for api gateway v1', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async (request, context) => {
+          assert.deepStrictEqual(request.headers.plain(), {
+            cookie: 'name1=value1;name2=value2',
+            host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+          });
+          const headers = new Headers();
+          headers.append('set-cookie', 'name1=value1');
+          headers.append('set-cookie', 'name2=value2');
+          return new Response('okay', { headers });
+        },
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT_V1,
+      headers: {
+        cookie: 'name1=value1;name2=value2',
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
+    assert.deepStrictEqual(res.cookies, ['name1=value1', 'name2=value2']);
+  });
+
+  it('properly removes empty cookies array for api gateway v1', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        // eslint-disable-next-line no-unused-vars
+        main: async (request, context) => {
+          assert.deepStrictEqual(request.headers.plain(), {
+            cookie: '',
+            host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+          });
+          return new Response('okay');
+        },
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT_V1,
+      cookies: [],
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.cookies, undefined);
   });
 
   it('handles multiple vary headers', async () => {
@@ -802,6 +988,27 @@ describe('Adapter tests for AWS', () => {
 
     const res = await lambda({
       ...DEFAULT_EVENT,
+      rawQueryString: 'foo=bar',
+      headers: {
+        host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
+      },
+      body: {
+        a: 'b',
+      },
+    }, DEFAULT_CONTEXT);
+    assert.strictEqual(res.statusCode, 400);
+  });
+
+  it('reports non-empty body with GET/HEAD request as 400 for api gateway v1', async () => {
+    const { lambda } = await esmock.p('../src/aws-adapter.js', {
+      '../src/main.js': {
+        main: async () => new Response('okay'),
+      },
+      '../src/aws-secrets.js': proxySecretsPlugin(awsSecretsPlugin),
+    });
+
+    const res = await lambda({
+      ...DEFAULT_EVENT_V1,
       rawQueryString: 'foo=bar',
       headers: {
         host: 'kvvyh7ikcb.execute-api.us-east-1.amazonaws.com',
