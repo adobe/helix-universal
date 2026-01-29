@@ -150,7 +150,7 @@ export function createAdapter(opts = {}) {
       }
 
       const host = event.requestContext?.domainName;
-      const method = event.requestContext?.http?.method;
+      const method = event.requestContext?.http?.method || event.httpMethod;
       const requestBody = event.isBase64Encoded ? Buffer.from(event.body, 'base64') : event.body;
       const path = event.rawPath ?? '';
       const queryString = nonHttp ? eventToQueryString(event) : event.rawQueryString || '';
@@ -184,10 +184,12 @@ export function createAdapter(opts = {}) {
       ] = context.invokedFunctionArn.split(':');
       const [packageName, name] = functionName.split('--');
 
+      // Support both API Gateway v2 (path) and v1 (proxy for {proxy+} routes)
+      const pathParam = event.pathParameters?.path || event.pathParameters?.proxy;
       const con = {
         resolver: new AWSResolver(event),
         pathInfo: {
-          suffix: event.pathParameters?.path ? `/${event.pathParameters.path}` : '',
+          suffix: pathParam ? `/${pathParam}` : '',
         },
         runtime: {
           name: 'aws-lambda',
@@ -253,6 +255,11 @@ export function createAdapter(opts = {}) {
         isBase64Encoded,
         body,
       };
+
+      // Delete cookies if it's empty. Added for API Gateway v1 compatibility.
+      if (!respObject.cookies?.length) {
+        delete respObject.cookies;
+      }
 
       if (responseTooLarge(respObject)) {
         return {
