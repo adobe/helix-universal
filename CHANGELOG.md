@@ -1,3 +1,10 @@
+# [5.4.0](https://github.com/adobe/helix-universal/compare/v5.3.0...v5.4.0) (2026-01-29)
+
+
+### Features
+
+* api gateway v1 support ([76bdcf2](https://github.com/adobe/helix-universal/commit/76bdcf233dfadb96c9d2d4d861f471519d06e5a9))
+
 # [5.3.0](https://github.com/adobe/helix-universal/compare/v5.2.3...v5.3.0) (2025-11-04)
 
 
