@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "3.0.25",
-    "@eslint/config-helpers": "0.5.4",
+    "@eslint/config-helpers": "0.5.5",
     "@google-cloud/secret-manager": "6.1.1",
     "@google-cloud/storage": "7.19.0",
     "@semantic-release/changelog": "6.0.3",
