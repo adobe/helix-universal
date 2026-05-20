@@ -1,3 +1,10 @@
+## [5.4.2](https://github.com/adobe/helix-universal/compare/v5.4.1...v5.4.2) (2026-05-20)
+
+
+### Bug Fixes
+
+* log package parameter loaded with level debug ([#459](https://github.com/adobe/helix-universal/issues/459)) ([6499fa3](https://github.com/adobe/helix-universal/commit/6499fa349a59fd6ce19406e439d7e2afccee04c3))
+
 ## [5.4.1](https://github.com/adobe/helix-universal/compare/v5.4.0...v5.4.1) (2026-04-08)
 
 
