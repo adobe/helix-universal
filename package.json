@@ -60,7 +60,7 @@
     "mocha-multi-reporters": "^1.5.1",
     "mocha-suppress-logs": "0.6.0",
     "nock": "14.0.16",
-    "semantic-release": "25.0.5"
+    "semantic-release": "25.0.7"
   },
   "lint-staged": {
     "*.js": "eslint"
