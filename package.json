@@ -46,21 +46,21 @@
     "@adobe/eslint-config-helix": "3.0.30",
     "@eslint/config-helpers": "0.7.0",
     "@google-cloud/secret-manager": "6.3.0",
-    "@google-cloud/storage": "7.21.0",
+    "@google-cloud/storage": "7.22.0",
     "@semantic-release/changelog": "7.0.0",
     "@semantic-release/git": "11.0.1",
     "aws-sdk": "2.1693.0",
     "c8": "12.0.0",
-    "eslint": "9.4.0",
+    "eslint": "9.39.5",
     "esmock": "2.7.6",
     "husky": "9.1.7",
     "junit-report-builder": "5.1.2",
-    "lint-staged": "17.2.0",
-    "mocha": "11.7.6",
+    "lint-staged": "17.3.0",
+    "mocha": "11.8.0",
     "mocha-multi-reporters": "^1.5.1",
     "mocha-suppress-logs": "0.6.0",
-    "nock": "14.0.16",
-    "semantic-release": "25.0.8"
+    "nock": "14.0.17",
+    "semantic-release": "25.0.9"
   },
   "lint-staged": {
     "*.js": "eslint"
