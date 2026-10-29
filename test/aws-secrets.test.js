@@ -34,7 +34,8 @@ describe('Secrets tests for AWS', () => {
   it('fetches secrets', async () => {
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
-      .reply((uri, body) => {
+      .reply(async (request) => {
+        const body = await request.text();
         assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
         return [200, {
           SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }),
@@ -58,7 +59,8 @@ describe('Secrets tests for AWS', () => {
   it('caches secrets', async () => {
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
-      .reply((uri, body) => {
+      .reply(async (request) => {
+        const body = await request.text();
         assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
         return [200, {
           SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }),
@@ -87,7 +89,8 @@ describe('Secrets tests for AWS', () => {
     const now = Date.now();
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
-      .reply((uri, body) => {
+      .reply(async (request) => {
+        const body = await request.text();
         assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
         return [200,
           { SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }) },
@@ -100,7 +103,8 @@ describe('Secrets tests for AWS', () => {
 
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
-      .reply((uri, body) => {
+      .reply(async (request) => {
+        const body = await request.text();
         assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
         return [200,
           { LastChangedDate: now / 1000 }, { 'content-type': 'application/json' },
@@ -114,7 +118,8 @@ describe('Secrets tests for AWS', () => {
   it('should reload cache if settings changed', async () => {
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
-      .reply((uri, body) => {
+      .reply(async (request) => {
+        const body = await request.text();
         assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
         return [200,
           { SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }) },
@@ -144,7 +149,8 @@ describe('Secrets tests for AWS', () => {
   it('handles error in check cache', async () => {
     nock('https://secretsmanager.us-east-1.amazonaws.com/')
       .post('/')
-      .reply((uri, body) => {
+      .reply(async (request) => {
+        const body = await request.text();
         assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
         return [200,
           { SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }) },
@@ -243,7 +249,8 @@ describe('Secrets tests for AWS', () => {
 
     nock('http://localhost:4566/')
       .post('/')
-      .reply((uri, body) => {
+      .reply(async (request) => {
+        const body = await request.text();
         assert.strictEqual(body, '{"SecretId":"/helix-deploy/helix3/all"}');
         return [200, {
           SecretString: JSON.stringify({ SOME_SECRET: 'pssst' }),
